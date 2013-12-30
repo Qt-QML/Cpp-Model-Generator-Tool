@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/folder.png</file>
+        <file>resources/save.png</file>
+        <file>resources/burn.png</file>
+        <file>resources/diagram.png</file>
+        <file>resources/redo.png</file>
+        <file>resources/undo.png</file>
+        <file>resources/root.cpp</file>
+        <file>resources/root.h</file>
+    </qresource>
+</RCC>
