@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QVariant>
-#include "model_engine/undocommands.h" //%%%
+#include "undocommands.h" //%%%
 
 class Undoer : public QObject
 {
