@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 
     ctxt->setContextProperty("modelLoader", new ModelLoader);
 
-    component.loadUrl(QUrl("qml/Coder/main.qml"));
+    component.loadUrl(QUrl("../Resources/qml/Coder/main.qml"));
     if ( !component.isReady() ) {
         qWarning("%s", qPrintable(component.errorString()));
         return -1;
