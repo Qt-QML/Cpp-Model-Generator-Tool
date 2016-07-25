@@ -49,6 +49,7 @@ ClassModel::ClassModel(QObject *parent) :
     QObject(parent)
 {
     _properties = new ObjectList(ClassProp::staticMetaObject);
+    _name = "unnamed";
 
     _ptrs.append(this);
 }

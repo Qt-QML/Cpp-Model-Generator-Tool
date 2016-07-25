@@ -32,14 +32,14 @@ SplitView {
                 id: button1
                 x: 45
                 y: 379
-                text: "+"
+                text: " + "
                 onClicked: properties.addRowWithUndo()
             }
             Button {
                 id: button2
                 x: 45
                 y: 405
-                text: "-"
+                text: " - "
                 onClicked: properties.removeWithUndo(tableList.currentRow)
             }
         }

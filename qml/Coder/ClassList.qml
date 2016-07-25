@@ -40,7 +40,7 @@ Item {
                 id: button1
                 x: 45
                 y: 379
-                text: "+"
+                text: " + "
                 onClicked: splitview2.model.classes.addRowWithUndo()
             }
 
@@ -48,7 +48,7 @@ Item {
                 id: button2
                 x: 45
                 y: 405
-                text: "-"
+                text: " - "
                 onClicked: splitview2.model.classes.removeWithUndo(tableList.currentRow)
 
             }

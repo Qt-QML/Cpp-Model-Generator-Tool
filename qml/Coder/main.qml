@@ -17,6 +17,9 @@ ApplicationWindow {
     property QtObject modelRoot: null
     Component.onCompleted: modelRoot = modelLoader.create();
 
+    width: 1200
+    height: 600
+
     minimumWidth: 400
     minimumHeight: 300
 
@@ -163,6 +166,9 @@ ApplicationWindow {
                 model: modelRoot
 
                 onSelectedIndexChanged: win.state = "prop"
+
+                // do not bind as layout takes care of width
+                Component.onCompleted: width = 200
             }
             SplitView {
                 height: parent.height

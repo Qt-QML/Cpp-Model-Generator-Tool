@@ -46,6 +46,8 @@ void ClassProp::clearIndex()
 ClassProp::ClassProp(QObject *parent) :
     QObject(parent)
 {
+    _name = "unnamed";
+
     _count = 0;
     _ptrs.append(this);
 }
