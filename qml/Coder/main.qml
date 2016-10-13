@@ -118,7 +118,7 @@ ApplicationWindow {
         selectMultiple: false
         selectFolder: true
 
-        onAccepted: modelRoot.generateFiles(fileDialog.fileUrl);
+        onAccepted: codeGenerator.generateFiles(modelRoot, fileDialog.fileUrl);
     }
 
     FileDialog {

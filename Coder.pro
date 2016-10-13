@@ -23,6 +23,7 @@ SOURCES += main.cpp \
     model_engine/undocommands.cpp \
     model/links.cpp \
     arrow.cpp \
+    codegenerator.cpp \
     model/modelloader.cpp
 
 # Installation path
@@ -45,6 +46,7 @@ HEADERS += \
     model/classmodel.h \
     model/links.h \
     arrow.h \
+    codegenerator.h \
     model_engine/undoer.h \
     model_engine/undocommands.h \
     model_engine/objectlist.h \
