@@ -21,16 +21,16 @@ public:
     QUndoStack * stack() const;
     void push(QUndoCommand * cmd);
 
-    Q_PROPERTY(QString nextText READ nextText NOTIFY nextTextChanged)
-    Q_PROPERTY(QString prevText READ prevText NOTIFY prevTextChanged)
+    Q_PROPERTY(QString redoText READ redoText NOTIFY redoTextChanged)
+    Q_PROPERTY(QString undoText READ undoText NOTIFY undoTextChanged)
 
-    QString nextText();
-    QString prevText();
+    QString redoText() const;
+    QString undoText() const;
 
 signals:
     void enabledChanged();
-    void nextTextChanged();
-    void prevTextChanged();
+    void redoTextChanged();
+    void undoTextChanged();
 
 public slots:
     void clear();

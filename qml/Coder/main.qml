@@ -79,7 +79,7 @@ ApplicationWindow {
     }
     Action {
         id: undoAction
-        text: "Undo " + modelLoader.undoer().prevText
+        text: "Undo " + modelLoader.undoer().undoText
         shortcut: "Ctrl+Z"
         iconSource: "qrc:/resources/undo.png"
         onTriggered: modelLoader.undoer().undo()
@@ -87,7 +87,7 @@ ApplicationWindow {
     }
     Action {
         id: redoAction
-        text: "Redo " + modelLoader.undoer().nextText
+        text: "Redo " + modelLoader.undoer().redoText
         shortcut: "Ctrl+Shift+Z"
         iconSource: "qrc:/resources/redo.png"
         onTriggered: modelLoader.undoer().redo()
