@@ -190,7 +190,7 @@ ApplicationWindow {
                     visible: opacity != 0.0
 
                     Layout.fillWidth: true
-                    properties: classEditor.classObj.properties
+                    properties: classEditor.classObj ? classEditor.classObj.properties : null
                 }
             }
         }

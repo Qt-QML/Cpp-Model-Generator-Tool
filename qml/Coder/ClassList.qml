@@ -50,8 +50,7 @@ Item {
                 x: 45
                 y: 405
                 text: " - "
-                onClicked: splitview2.model.classes.removeWithUndo(tableList.currentRow)
-
+                onClicked: splitview2.model.classes.removeWithUndo(selectedIndex)
             }
         }
     }

@@ -5,18 +5,13 @@ import QtQuick.Layouts 1.0
 Item {
     property QtObject classObj
 
-    // workaround
-    onClassObjChanged: {
-        //check_box1.checked = classObj.index;
-    }
-
     TextField {
         id: text_field1
         x: 91
         y: 15
         placeholderText: ""
 
-        text: classObj.name
+        text: classObj ? classObj.name : ""
         onTextChanged: classObj.name = text
     }
 
@@ -35,8 +30,11 @@ Item {
         y: 16
         text: "index"
 
-        checkedState: (classObj.index? Qt.Checked : Qt.Unchecked)
-        onClicked: classObj.index = checked
+        checked: classObj && classObj.index
+        onClicked: {
+            classObj.index = checked
+            checked = Qt.binding(function() { return classObj && classObj.index; })
+        }
     }
     */
 }
