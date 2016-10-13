@@ -23,6 +23,7 @@ SplitView {
             itemDelegate: Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: properties.get(styleData.row).name
+                color: styleData.textColor
             }
 
             TableViewColumn { title: "Properties" }

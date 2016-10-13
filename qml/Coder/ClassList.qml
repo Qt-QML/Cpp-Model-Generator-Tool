@@ -32,6 +32,7 @@ Item {
             itemDelegate: Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: splitview2.model.classes.get(styleData.row).name
+                color: styleData.textColor
             }
             TableViewColumn { title: "Classes" }
         }
