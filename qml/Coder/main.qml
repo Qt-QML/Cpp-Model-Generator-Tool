@@ -79,18 +79,18 @@ ApplicationWindow {
     }
     Action {
         id: undoAction
-        text: "Undo " + modelRoot.undoer.prevText
+        text: "Undo " + modelLoader.undoer().prevText
         shortcut: "Ctrl+Z"
         iconSource: "qrc:/resources/undo.png"
-        onTriggered: modelRoot.undoer.undo()
+        onTriggered: modelLoader.undoer().undo()
         tooltip: text
     }
     Action {
         id: redoAction
-        text: "Redo " + modelRoot.undoer.nextText
+        text: "Redo " + modelLoader.undoer().nextText
         shortcut: "Ctrl+Shift+Z"
         iconSource: "qrc:/resources/redo.png"
-        onTriggered: modelRoot.undoer.redo()
+        onTriggered: modelLoader.undoer().redo()
         tooltip: text
     }
     Action {

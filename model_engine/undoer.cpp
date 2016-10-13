@@ -1,5 +1,6 @@
 #include "undoer.h"
 #include <QDebug>
+#include <QQmlEngine>
 
 #define UNDO_MERGE_TIME 100
 
@@ -9,13 +10,15 @@ Undoer::Undoer(QObject *parent) :
 {
     _enabled = true;
     _noundo = true;
-    _stack = new QUndoStack();
+    _stack = new QUndoStack(this);
 }
 
 Undoer * Undoer::instance()
 {
-    if (_instance == NULL)
+    if (!_instance) {
         _instance = new Undoer;
+        QQmlEngine::setObjectOwnership(_instance, QQmlEngine::CppOwnership);
+    }
 
     return _instance;
 }
