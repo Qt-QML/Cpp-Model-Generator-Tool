@@ -34,12 +34,6 @@ include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
 qtcAddDeployment()
 
 HEADERS += \
-    classmodel.h \
-    classprop.h \
-    objectlist.h \
-    undoer.h \
-    undocommands.h \
-    model.h \
     model/classes.h \
     model/model.h \
     model/classprop.h \
