@@ -1,4 +1,4 @@
-#include "classModel.h"
+#include "classmodel.h"
 #include <QDebug>
 
 //// - [ static ] ----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-#include "classProp.h"
+#include "classprop.h"
 //// - [ static ] ----------------------------------------------------------------------------
 QList<ClassProp*> ClassProp::_ptrs;
 QHash<ClassProp *, quint32> ClassProp::_indexedPtrs;
