@@ -1,4 +1,4 @@
-#include "classProp.h"
+#include "classprop.h"
 //// - [ static ] ----------------------------------------------------------------------------
 QList<ClassProp*> ClassProp::_ptrs;
 QHash<ClassProp *, quint32> ClassProp::_indexedPtrs;
@@ -256,10 +256,10 @@ void ClassProp::setName(QString val)
 }
 void ClassProp::setNameImp(QString val)
 {
-    updateInit();
-
     _name = val;
     emit nameChanged();
+
+    updateInit();
 }
 
 // ----[ type ] ----
@@ -415,7 +415,7 @@ void ClassProp::updateInit()
     {
         if (_null)
         {
-            setInit( QString("_") + _name + " = NULL;");
+            setInit(QString("_") + _name + " = NULL");
             setDestruct("");
         }
         else
@@ -426,24 +426,22 @@ void ClassProp::updateInit()
 
             QString init = \
                     QString("_") + _name + " = NULL;\n"
-                    "\tset%%Propname%%Imp(new " + _subType + "());\n";
+                    "    set%%Propname%%Imp(new " + _subType + "())";
 
             init.replace("%%Propname%%", Name, Qt::CaseSensitive);
 
             setInit(init);
-            setDestruct(QString("_") + _name+ "->deleteLater();");
+            setDestruct(QString("_") + _name+ "->deleteLater()");
         }
     }
 
     if (_type == "ObjectList*")
     {
-        setInit( (QString("_") + _name + " = new ObjectList("+_subType+"::staticMetaObject, %1);").arg(_count));
-        setDestruct(QString("_") + _name+ "->deleteLater();");
+        setInit((QString("_") + _name + " = new ObjectList("+_subType+"::staticMetaObject, %1)").arg(_count));
+        setDestruct(QString("_") + _name+ "->deleteLater()");
     }
-
-
-
 }
+
 QDataStream& operator<< (QDataStream& ds, const ClassProp * p)
 {
 
@@ -537,291 +535,4 @@ QDataStream& operator>> (QDataStream& ds, ClassProp * p)
 
 
     return ds;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-QString ClassProp::generateH() const
-{
-    QString h;
-
-    h += "public:\n";
-
-    h += "\tQ_PROPERTY(%%proptype%% %%propname%% ";
-    if (_read)
-        h += " READ %%propname%% ";
-    if (_write)
-        h += " WRITE set%%Propname%% ";
-
-    if (_notify)
-        h += " NOTIFY %%propname%%Changed ";
-    if (!_write)
-        h += " CONSTANT ";
-    h += " )\n";
-
-    if (_validate.length() > 0)
-        h += "\tbool validate%%Propname%%(%%proptype%% val) const;\n";
-
-    if (_read)
-        h += "\t%%proptype%% %%propname%%() const;\n";
-
-    if (_write)
-        h += "\tvoid set%%Propname%%(%%proptype%% val);\n";
-
-    if (_notify)
-        h += "signals:\n\tvoid %%propname%%Changed();\n";
-
-    h += "private:\n\tvoid set%%Propname%%Imp(%%proptype%% val);\n";
-
-    h += "private:\n";
-    h += "\t%%proptype%% _%%propname%%;\n";
-
-    if (_type == "QObject*")
-    {
-        h += "private slots:\n"
-                "\tvoid %%propname%%DeletedSlot();\n";
-    }
-    QString Name = _name;
-    QChar *ptr = Name.data();
-    *ptr = ptr->toUpper();
-
-    QString name = _name;
-    ptr = name.data();
-    *ptr = ptr->toLower();
-
-    QString type = _type;
-    if (type == "QObject*")
-        type = _subType + "*";// pointer to subclass
-
-    h.replace("%%proptype%%", type, Qt::CaseSensitive);
-    h.replace("%%propname%%", name, Qt::CaseSensitive);
-    h.replace("%%Propname%%", Name, Qt::CaseSensitive);
-
-    return h;
-}
-
-QString ClassProp::generateCPP(const QString &classname) const
-{
-    QString cpp;
-
-    ////////////////////////////////////////////////////////////
-    cpp += ""
-            "%%proptype%% %%Classname%%::%%propname%%() const\n"
-            "{\n"
-            "\treturn _%%propname%%;\n"
-            "}\n";
-
-
-    ////////////////////////////////////////////////////////////
-    if (_write)
-    {
-        cpp +=  "void %%Classname%%::set%%Propname%%(%%proptype%% val)\n"
-                "{\n";
-
-        cpp += "\tif (val == _%%propname%%)\n"
-                "\t\treturn;\n\n";
-
-        if (_undo)
-        {
-            cpp += "\tif (Undoer::instance()->noundo() == false)\n"
-                    "\t{\n"
-                    "\t\tset%%Propname%%Imp(val);\n"
-                    "\t\treturn;\n"
-                    "\t}\n\n";
-        }
-
-        if (_validate.length() > 0)
-            cpp += "\tif (!validate%%Propname%%(val))\n"
-                    "\t\treturn;\n\n";
-
-        if (_undo)
-        {
-            cpp += "\tQUndoCommand *cmd = new PropertyChangeCmd(this, \"%%propname%%\",";
-
-            if (!_type.endsWith("*")) // if its not a pointer
-                cpp += "QVariant(_%%propname%%), QVariant(val));\n";
-            else
-                cpp += "QVariant::fromValue(_%%propname%%), QVariant::fromValue(val));\n";
-
-            cpp += "\tcmd->setText(\"Set %%Propname%%\");\n"
-                    "\tUndoer::instance()->push(cmd);\n";
-        }
-        else if (_notify) // if no undo
-        {
-            cpp += "\t_%%propname%% = val;\n"
-                    "\temit %%propname%%Changed();\n";
-        }
-        cpp += "}\n";
-    }
-
-    //implicit write
-    ////////////////////////////////////////////////////////////////////////
-
-    cpp += "void %%Classname%%::set%%Propname%%Imp(%%proptype%% val)\n"
-            "{\n";
-    if (_type == "QObject*")
-    {
-        cpp += "\tif (_%%propname%% != NULL)\n"
-                "\t\tdisconnect(reinterpret_cast<QObject*>(_%%propname%%), SIGNAL(destroyed()), this, SLOT(%%propname%%DeletedSlot()));\n";
-        cpp += "\tif (val != NULL)\n"
-                "\t\tconnect(reinterpret_cast<QObject*>(val), SIGNAL(destroyed()), this, SLOT(%%propname%%DeletedSlot()));\n\n";
-    }
-    cpp += "\t_%%propname%% = val;\n";
-    if (_notify)
-        cpp += "\temit %%propname%%Changed();\n";
-    cpp +=  "}\n";
-
-    ////////////////////////////////////////////////////////////////////////
-    if (_validate > 0 && _write)
-    {
-        cpp += "bool %%Classname%%::validate%%Propname%%(%%proptype%% val) const\n"
-                "{\n"
-                "\treturn %%validate%%;\n"
-                "}\n";
-    }
-    ////////////////////////////////////////////////////////////////////////
-    if (_type == "QObject*")
-    {
-        cpp += "void %%Classname%%::%%propname%%DeletedSlot()\n"
-                "{\n"
-                "\tset%%Propname%%(NULL);\n"
-                "}\n";
-    }
-
-    ////////////////////////////////////////////////////////////////////////
-
-    QString Name = _name;
-    QChar *ptr = Name.data();
-    *ptr = ptr->toUpper();
-
-    QString name = _name;
-    ptr = name.data();
-    *ptr = ptr->toLower();
-
-    QString type = _type;
-    if (type == "QObject*")
-        type = _subType + "*";// pointer to subclass
-
-    cpp.replace("%%validate%%", _validate, Qt::CaseSensitive);
-    cpp.replace("%%Classname%%", classname, Qt::CaseSensitive);
-    cpp.replace("%%propname%%", name, Qt::CaseSensitive);
-    cpp.replace("%%Propname%%", Name, Qt::CaseSensitive);
-    cpp.replace("%%proptype%%", type, Qt::CaseSensitive);
-
-    return cpp;
-}
-
-
-
-QString ClassProp::generateSave() const
-{
-    QString cpp;
-
-    if (_type == "QObject*")
-        cpp += "\tds << %%proptype%%::_indexedPtrs.value(p->_%%propname%%);";
-    else if (_type == "ObjectList*")
-    {
-        cpp += "\tds << ((qint32)(p->_%%propname%%->count()));\n"
-                "\tfor (int i=0; i<p->_%%propname%%->count(); i++)\n"
-                "\t{\n"
-                "\t\t%%proptype%% *o = p->_%%propname%%->get<%%proptype%%*>(i);\n"
-                "\t\tds << %%proptype%%::_indexedPtrs.value(o);\n"
-                "\t}\n";
-    }
-    else
-        cpp += "\tds << p->_%%propname%%;\n";
-
-    QString Name = _name;
-    QChar *ptr = Name.data();
-    *ptr = ptr->toUpper();
-
-    QString name = _name;
-    ptr = name.data();
-    *ptr = ptr->toLower();
-
-    QString type = _type;
-    if (type == "QObject*")
-        type = _subType ;// pointer to subclass
-    else if (type == "ObjectList*")
-        type = _subType ;// pointer to subclass
-
-
-    cpp.replace("%%propname%%", name, Qt::CaseSensitive);
-    cpp.replace("%%Propname%%", Name, Qt::CaseSensitive);
-    cpp.replace("%%proptype%%", type, Qt::CaseSensitive);
-
-
-    return cpp;
-}
-
-
-QString ClassProp::generateLoad() const
-{
-    QString cpp;
-
-    if (_type == "QObject*")
-        cpp += "\tds >> index; p->set%%Propname%%Imp((index == -1 ? NULL : %%proptype%%::_ptrs[index]));\n";
-    else if (_type == "ObjectList*")
-    {
-        cpp += "\tp->%%propname%%()->removeAll();\n"
-                "\tds >> count;\n"
-                "\tfor (quint32 i=0; i<count; i++)\n"
-                "\t{\n"
-                "\t\tds >> index;\n"
-                "\t\t%%proptype%% *obj  = (index == -1 ? NULL : %%proptype%%::_ptrs[index]);\n"
-                "\t\tp->%%propname%%()->insertRow(obj,  p->%%propname%%()->count());\n"
-                "\t}\n";
-    }
-    else
-        cpp += "\tds >> p->_%%propname%%;\n";
-
-
-
-    QString Name = _name;
-    QChar *ptr = Name.data();
-    *ptr = ptr->toUpper();
-
-    QString name = _name;
-    ptr = name.data();
-    *ptr = ptr->toLower();
-
-    QString type = _type;
-    if (type == "QObject*")
-        type = _subType ;// pointer to subclass
-    else if (type == "ObjectList*")
-        type = _subType ;// pointer to subclass
-
-
-    cpp.replace("%%propname%%", name, Qt::CaseSensitive);
-    cpp.replace("%%Propname%%", Name, Qt::CaseSensitive);
-    cpp.replace("%%proptype%%", type, Qt::CaseSensitive);
-
-
-    return cpp;
 }

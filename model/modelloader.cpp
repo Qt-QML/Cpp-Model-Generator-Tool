@@ -18,6 +18,10 @@ ModelLoader::ModelLoader(QObject *parent) :
     qmlRegisterType<Model>();
 }
 
+Undoer * ModelLoader::undoer() const
+{
+    return Undoer::instance();
+}
 
 QObject * ModelLoader::create()
 {

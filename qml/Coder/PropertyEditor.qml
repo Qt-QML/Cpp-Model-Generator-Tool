@@ -6,7 +6,7 @@ SplitView {
     id: splitview1
 
     property QtObject properties
-    property int selectedIndex: tableList.currentRow
+    property alias selectedIndex: tableList.currentRow
 
 
     ColumnLayout {
@@ -23,6 +23,7 @@ SplitView {
             itemDelegate: Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: properties.get(styleData.row).name
+                color: styleData.textColor
             }
 
             TableViewColumn { title: "Properties" }
@@ -40,7 +41,7 @@ SplitView {
                 x: 45
                 y: 405
                 text: " - "
-                onClicked: properties.removeWithUndo(tableList.currentRow)
+                onClicked: properties.removeWithUndo(selectedIndex)
             }
         }
     }
@@ -50,7 +51,7 @@ SplitView {
         opacity: (selectedProp !== null? 1.0 : 0.0)
         visible: opacity != 0.0
 
-        selectedProp: (properties.count > 0 ? properties.get(selectedIndex) : null)
+        selectedProp: selectedIndex >= 0 ? properties.get(selectedIndex) : null
 
         Behavior on opacity { PropertyAnimation { duration: 200 }}
     }

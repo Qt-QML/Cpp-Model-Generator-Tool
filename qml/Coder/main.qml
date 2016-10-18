@@ -79,18 +79,18 @@ ApplicationWindow {
     }
     Action {
         id: undoAction
-        text: "Undo " + modelRoot.undoer.prevText
+        text: "Undo " + modelLoader.undoer().undoText
         shortcut: "Ctrl+Z"
         iconSource: "qrc:/resources/undo.png"
-        onTriggered: modelRoot.undoer.undo()
+        onTriggered: modelLoader.undoer().undo()
         tooltip: text
     }
     Action {
         id: redoAction
-        text: "Redo " + modelRoot.undoer.nextText
+        text: "Redo " + modelLoader.undoer().redoText
         shortcut: "Ctrl+Shift+Z"
         iconSource: "qrc:/resources/redo.png"
-        onTriggered: modelRoot.undoer.redo()
+        onTriggered: modelLoader.undoer().redo()
         tooltip: text
     }
     Action {
@@ -118,7 +118,7 @@ ApplicationWindow {
         selectMultiple: false
         selectFolder: true
 
-        onAccepted: modelRoot.generateFiles(fileDialog.fileUrl);
+        onAccepted: codeGenerator.generateFiles(modelRoot, fileDialog.fileUrl);
     }
 
     FileDialog {
@@ -190,7 +190,7 @@ ApplicationWindow {
                     visible: opacity != 0.0
 
                     Layout.fillWidth: true
-                    properties: classEditor.classObj.properties
+                    properties: classEditor.classObj ? classEditor.classObj.properties : null
                 }
             }
         }

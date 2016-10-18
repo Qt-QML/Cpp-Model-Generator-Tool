@@ -5,24 +5,15 @@ import QtQuick.Layouts 1.0
 Item {
     property QtObject selectedProp
 
-    //bugi workaround
-    onSelectedPropChanged: {
-        undo.checked = selectedProp.undo;
-        read.checked = selectedProp.read;
-        write.checked = selectedProp.write;
-        notify.checked = selectedProp.notify;
-        save.checked = selectedProp.save;
-    }
-
     TextField {
         id: name
         x: 68
         y: 16
         width: 162
         height: 21
-        placeholderText: "Text Field"
+        placeholderText: "Name"
 
-        text: selectedProp.name
+        text: selectedProp ? selectedProp.name : ""
         onTextChanged: selectedProp.name = text
     }
 
@@ -57,7 +48,11 @@ Item {
             ListElement { text: "Song*" ; sub: false; }
         }
 
-        Binding { target:type; property: "currentType"; value: selectedProp.type; }
+        Binding {
+            target: type;
+            property: "currentType";
+            value: selectedProp ? selectedProp.type : "";
+        }
         onCurrentTypeChanged: {
             for (var i=0;i<items.count;i++)
                 if (items.get(i).text === currentType)
@@ -66,7 +61,10 @@ Item {
                     break;
                 }
         }
-        onCurrentIndexChanged: if (selectedProp !== null) selectedProp.type = items.get(currentIndex).text;
+        onCurrentIndexChanged: {
+            if (selectedProp !== null)
+                selectedProp.type = items.get(currentIndex).text;
+        }
     }
 /*
     ComboBox {
@@ -100,11 +98,11 @@ Item {
         x: 193
         y: 47
 
-        visible: (type.currentType === "ObjectList*" || type.currentType === "QObject*")
+        visible: type.currentType === "ObjectList*" || type.currentType === "QObject*"
 
         placeholderText: "ptr type"
 
-        text: selectedProp.subType;
+        text: selectedProp ? selectedProp.subType: "";
         onTextChanged: selectedProp.subType = text
     }
 
@@ -117,7 +115,7 @@ Item {
         y: 47
 
         placeholderText: "init count"
-        text: selectedProp.count;
+        text: selectedProp ? selectedProp.count : "";
         onTextChanged: selectedProp.count = text
     }
 
@@ -131,8 +129,11 @@ Item {
 
         text: "isNull";
 
-        checked: selectedProp.null;
-        onCheckedChanged: selectedProp.null = checked
+        checked: selectedProp && selectedProp.null
+        onClicked: {
+            selectedProp.null = checked
+            checked = Qt.binding(function() { return selectedProp && selectedProp.null; })
+        }
     }
 
 
@@ -140,8 +141,8 @@ Item {
     TextField {
         id: init
 
-        readOnly:  (type.currentType === "ObjectList*" || type.currentType === "QObject*")
-        textColor : (readOnly?"gray": "black")
+        readOnly: type.currentType === "ObjectList*" || type.currentType === "QObject*"
+        textColor: readOnly ? "gray" : "black"
 
         x: 68
         y: 109
@@ -149,7 +150,7 @@ Item {
         height: 21
         placeholderText: "_name = \"untitled\"";
 
-        text: selectedProp.init
+        text: selectedProp ? selectedProp.init : ""
         onTextChanged: selectedProp.init = text
     }
 
@@ -161,7 +162,7 @@ Item {
         height: 21
         placeholderText: "val.contains(\"a\")"
 
-        text: selectedProp.validate
+        text: selectedProp ? selectedProp.validate : ""
         onTextChanged: selectedProp.validate = text
 
     }
@@ -169,8 +170,8 @@ Item {
     TextField {
         id: destruct
 
-        readOnly:  (type.currentType === "ObjectList*" || type.currentType === "QObject*")
-        textColor : (readOnly?"gray": "black")
+        readOnly: type.currentType === "ObjectList*" || type.currentType === "QObject*"
+        textColor : readOnly ? "gray": "black"
 
         x: 68
         y: 141
@@ -178,9 +179,8 @@ Item {
         height: 21
         placeholderText: "Text Field"
 
-        text: selectedProp.destruct
+        text: selectedProp ? selectedProp.destruct : ""
         onTextChanged: selectedProp.destruct = text
-
     }
 
     CheckBox {
@@ -189,8 +189,11 @@ Item {
         y: 34
         text: "Write"
 
-        checkedState: (selectedProp.write? Qt.Checked : Qt.Unchecked)
-        onClicked: selectedProp.write = checked
+        checked: selectedProp && selectedProp.write
+        onClicked: {
+            selectedProp.write = checked
+            checked = Qt.binding(function() { return selectedProp && selectedProp.write; })
+        }
     }
 
     CheckBox {
@@ -199,8 +202,11 @@ Item {
         y: 14
         text: "Read"
 
-        checkedState: (selectedProp.read? Qt.Checked : Qt.Unchecked)
-        onClicked: selectedProp.read = checked
+        checked: selectedProp && selectedProp.read
+        onClicked: {
+            selectedProp.read = checked
+            checked = Qt.binding(function() { return selectedProp && selectedProp.read; })
+        }
     }
 
     CheckBox {
@@ -209,8 +215,11 @@ Item {
         y: 94
         text: "Save"
 
-        checkedState: (selectedProp.save? Qt.Checked : Qt.Unchecked)
-        onClicked: selectedProp.save = checked
+        checked: selectedProp && selectedProp.save
+        onClicked: {
+            selectedProp.save = checked
+            checked = Qt.binding(function() { return selectedProp && selectedProp.save; })
+        }
     }
 
     CheckBox {
@@ -221,8 +230,11 @@ Item {
 
         visible: write.checked
 
-        checkedState: (selectedProp.notify? Qt.Checked : Qt.Unchecked)
-        onClicked: selectedProp.notify = checked
+        checked: selectedProp && selectedProp.notify
+        onClicked: {
+            selectedProp.notify = checked
+            checked = Qt.binding(function() { return selectedProp && selectedProp.notify; })
+        }
     }
 
     CheckBox {
@@ -233,7 +245,11 @@ Item {
 
         visible: write.checked
 
-        onClicked: selectedProp.undo = checked
+        checked: selectedProp && selectedProp.undo
+        onClicked: {
+            selectedProp.undo = checked
+            checked = Qt.binding(function() { return selectedProp && selectedProp.undo; })
+        }
     }
 
     Text {
@@ -275,8 +291,4 @@ Item {
         text: qsTr("Destruct")
         font.pixelSize: 12
     }
-
-
-
-
 }

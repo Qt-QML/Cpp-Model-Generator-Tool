@@ -23,6 +23,7 @@ SOURCES += main.cpp \
     model_engine/undocommands.cpp \
     model/links.cpp \
     arrow.cpp \
+    codegenerator.cpp \
     model/modelloader.cpp
 
 # Installation path
@@ -33,18 +34,13 @@ include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
 qtcAddDeployment()
 
 HEADERS += \
-    classmodel.h \
-    classprop.h \
-    objectlist.h \
-    undoer.h \
-    undocommands.h \
-    model.h \
     model/classes.h \
     model/model.h \
     model/classprop.h \
     model/classmodel.h \
     model/links.h \
     arrow.h \
+    codegenerator.h \
     model_engine/undoer.h \
     model_engine/undocommands.h \
     model_engine/objectlist.h \

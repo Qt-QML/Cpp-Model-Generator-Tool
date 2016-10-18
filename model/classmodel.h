@@ -64,10 +64,6 @@ private:
 
 
 public:
-    QString generateH() const;
-    QString generateCPP(const Model *model) const;
-
-
     friend QDataStream& operator<< (QDataStream& ds, const ClassModel * p);
 	friend QDataStream& operator>> (QDataStream& ds, ClassModel * p);
 

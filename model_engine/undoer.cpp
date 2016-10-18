@@ -1,5 +1,6 @@
 #include "undoer.h"
 #include <QDebug>
+#include <QQmlEngine>
 
 #define UNDO_MERGE_TIME 100
 
@@ -9,13 +10,18 @@ Undoer::Undoer(QObject *parent) :
 {
     _enabled = true;
     _noundo = true;
-    _stack = new QUndoStack();
+    _stack = new QUndoStack(this);
+
+    connect(_stack, SIGNAL(undoTextChanged(QString)), this, SIGNAL(redoTextChanged()));
+    connect(_stack, SIGNAL(redoTextChanged(QString)), this, SIGNAL(undoTextChanged()));
 }
 
 Undoer * Undoer::instance()
 {
-    if (_instance == NULL)
+    if (!_instance) {
         _instance = new Undoer;
+        QQmlEngine::setObjectOwnership(_instance, QQmlEngine::CppOwnership);
+    }
 
     return _instance;
 }
@@ -25,26 +31,20 @@ QUndoStack * Undoer::stack() const
     return _stack;
 }
 
-QString Undoer::nextText()
+QString Undoer::redoText() const
 {
-    int index = _stack->index();
-    qDebug() <<index;
-    return (index < _stack->count()? _stack->command(index)->text() : "");
+    return _stack->redoText();
 }
 
-QString Undoer::prevText()
+QString Undoer::undoText() const
 {
-    int index = _stack->index()-1;
-
-    return (index >= 0? _stack->command(index)->text() : "");
+    return _stack->undoText();
 }
 
 void Undoer::push(QUndoCommand *cmd)
 {
     _noundo = false;
     {
-
-
 //        if (_time.elapsed() < UNDO_MERGE_TIME && _stack->count() > 0)
 //        {
 //            const UndoCommand *lastCommand = reinterpret_cast<const UndoCommand*>(_stack->command(_stack->count()-1));
@@ -59,9 +59,6 @@ void Undoer::push(QUndoCommand *cmd)
             _stack->push(cmd);
 //        }
 //        _time.restart();
-
-        emit nextTextChanged();
-        emit prevTextChanged();
     }
     _noundo = true;
 }
@@ -88,9 +85,6 @@ void Undoer::undo()
     _noundo = false;
     {
         _stack->undo();
-
-        emit nextTextChanged();
-        emit prevTextChanged();
     }
     _noundo = true;
 }
@@ -100,9 +94,6 @@ void Undoer::redo()
     _noundo = false;
     {
         _stack->redo();
-
-        emit nextTextChanged();
-        emit prevTextChanged();
     }
     _noundo = true;
 }

@@ -32,6 +32,7 @@ Item {
             itemDelegate: Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: splitview2.model.classes.get(styleData.row).name
+                color: styleData.textColor
             }
             TableViewColumn { title: "Classes" }
         }
@@ -49,8 +50,7 @@ Item {
                 x: 45
                 y: 405
                 text: " - "
-                onClicked: splitview2.model.classes.removeWithUndo(tableList.currentRow)
-
+                onClicked: splitview2.model.classes.removeWithUndo(selectedIndex)
             }
         }
     }

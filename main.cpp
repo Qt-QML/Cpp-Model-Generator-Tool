@@ -6,6 +6,7 @@
 #include "model/root.h"
 #include "model_engine/undoer.h"
 #include "arrow.h"
+#include "codegenerator.h"
 #include "model/modelloader.h"
 
 int main(int argc, char *argv[])
@@ -16,11 +17,16 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<Arrow>("CustomCPP", 1, 0, "Arrow"); //%%%
 
-    QQmlContext *ctxt = engine.rootContext();
+    QQmlContext *context = engine.rootContext();
 
-    ctxt->setContextProperty("modelLoader", new ModelLoader);
+    context->setContextProperty("modelLoader", new ModelLoader);
+    context->setContextProperty("codeGenerator", new CodeGenerator);
 
+#ifdef Q_OS_MAC
     component.loadUrl(QUrl("../Resources/qml/Coder/main.qml"));
+#else
+    component.loadUrl(QUrl("qml/Coder/main.qml"));
+#endif
     if ( !component.isReady() ) {
         qWarning("%s", qPrintable(component.errorString()));
         return -1;

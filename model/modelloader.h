@@ -2,7 +2,9 @@
 #define MODELLOADER_H
 
 #include <QObject>
+
 class Model;
+class Undoer;
 
 class ModelLoader : public QObject
 {
@@ -17,6 +19,7 @@ public slots:
     QObject * load(const QString & fileName);
     void save(const QString & fileName, QObject *model) const;
 
+    Undoer * undoer() const;
 };
 
 #endif // MODELLOADER_H

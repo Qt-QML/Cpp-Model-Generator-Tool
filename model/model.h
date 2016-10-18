@@ -62,10 +62,6 @@ private:
 private:
     QRectF _winRect;
 
-public slots:
-    void generateFiles(const QString &folder) const;
-
-
 
 public:
     friend QDataStream& operator<< (QDataStream& ds, const Model * p);

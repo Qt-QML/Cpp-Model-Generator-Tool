@@ -190,13 +190,6 @@ private:
 private:
     void updateInit();
 public:
-    QString generateH() const;
-    QString generateCPP(const QString &classname) const;
-
-    QString generateSave() const;
-    QString generateLoad() const;
-
-
     friend QDataStream& operator<< (QDataStream& ds, const ClassProp * p);
     friend QDataStream& operator>> (QDataStream& ds, ClassProp * p);
 
