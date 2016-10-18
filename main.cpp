@@ -2,7 +2,6 @@
 #include <QtQml>
 #include <QtQuick/QQuickView>
 
-#include "qtquick2applicationviewer.h"
 #include "model/root.h"
 #include "model_engine/undoer.h"
 #include "arrow.h"
