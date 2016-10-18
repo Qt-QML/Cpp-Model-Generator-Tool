@@ -31,10 +31,11 @@ Item {
 
             itemDelegate: Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: splitview2.model.classes.get(styleData.row).name
+                text: styleData.value ? styleData.value.name : "";
                 color: styleData.textColor
             }
-            TableViewColumn { title: "Classes" }
+
+            TableViewColumn { title: "Classes"; role: "row" }
         }
         RowLayout {
             Button {

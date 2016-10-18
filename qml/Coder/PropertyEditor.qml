@@ -22,11 +22,11 @@ SplitView {
 
             itemDelegate: Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: properties.get(styleData.row).name
+                text: styleData.value ? styleData.value.name : "";
                 color: styleData.textColor
             }
 
-            TableViewColumn { title: "Properties" }
+            TableViewColumn { title: "Properties"; role: "row" }
         }
         RowLayout {
             Button {
