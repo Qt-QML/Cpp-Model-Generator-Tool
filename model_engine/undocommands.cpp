@@ -163,8 +163,8 @@ void MoveRowCmd::redo()
 
 void MoveRowCmd::objDestroyed()
 {
-    connect(_obj1, SIGNAL(destroyed()), this, SLOT(objDestroyed()));
-    connect(_obj2, SIGNAL(destroyed()), this, SLOT(objDestroyed()));
+    disconnect(_obj1, SIGNAL(destroyed()), this, SLOT(objDestroyed()));
+    disconnect(_obj2, SIGNAL(destroyed()), this, SLOT(objDestroyed()));
 
     setText("null");
 
