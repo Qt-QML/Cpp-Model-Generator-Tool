@@ -283,7 +283,7 @@ static QString generateClassModelH(const ClassModel *classModel)
     for (int i=0;i<classModel->properties()->count(); i++)
     {
         ClassProp *p =  classModel->properties()->get<ClassProp*>(i);
-        cpp += QString("\n\n// ----[ ") + p->name() + " ] ----\n" + generateClassPropH(p) ;
+        cpp += QString("\n\n    // ----[ ") + p->name() + " ] ----\n" + generateClassPropH(p) ;
     }
 
     cpp += "\n\npublic:\n"
@@ -376,7 +376,7 @@ static QString generateClassModelCPP(const ClassModel *classModel)
     cpp +=  "%%Classname%%::%%Classname%%(QObject *parent) :\n"
             "    QObject(parent)\n"
             "{\n"
-            "        QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);\n";
+            "    QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);\n";
     for (int i=0;i<classModel->properties()->count(); i++)
     {
         ClassProp *p =  classModel->properties()->get<ClassProp*>(i);
@@ -416,7 +416,7 @@ static QString generateClassModelCPP(const ClassModel *classModel)
     {
         ClassProp *p =  classModel->properties()->get<ClassProp*>(i);
         if (p->save() == true)
-            cpp += QString("\n\n// ----[ ") + p->name() + " SAVE ] ----\n" + generateClassPropSave(p);
+            cpp += QString("\n\n    // ----[ ") + p->name() + " SAVE ] ----\n" + generateClassPropSave(p);
     }
     cpp += "\n\n    return ds;\n"
             "}";
@@ -429,7 +429,7 @@ static QString generateClassModelCPP(const ClassModel *classModel)
     {
         ClassProp *p =  classModel->properties()->get<ClassProp*>(i);
         if (p->save() == true)
-            cpp += QString("\n// ----[ ") + p->name() + " LOAD ] ----\n" + generateClassPropLoad(p);
+            cpp += QString("\n    // ----[ ") + p->name() + " LOAD ] ----\n" + generateClassPropLoad(p);
     }
     cpp += "\n\n    return ds;\n"
             "}\n";
