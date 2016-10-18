@@ -15,7 +15,7 @@ static QString generateClassPropH(const ClassProp *classProp)
 
     h += "public:\n";
 
-    h += "\tQ_PROPERTY(%%proptype%% %%propname%% ";
+    h += "    Q_PROPERTY(%%proptype%% %%propname%% ";
     if (classProp->read())
         h += " READ %%propname%% ";
     if (classProp->write())
@@ -28,26 +28,26 @@ static QString generateClassPropH(const ClassProp *classProp)
     h += " )\n";
 
     if (classProp->validate().length() > 0)
-        h += "\tbool validate%%Propname%%(%%proptype%% val) const;\n";
+        h += "    bool validate%%Propname%%(%%proptype%% val) const;\n";
 
     if (classProp->read())
-        h += "\t%%proptype%% %%propname%%() const;\n";
+        h += "    %%proptype%% %%propname%%() const;\n";
 
     if (classProp->write())
-        h += "\tvoid set%%Propname%%(%%proptype%% val);\n";
+        h += "    void set%%Propname%%(%%proptype%% val);\n";
 
     if (classProp->notify())
-        h += "signals:\n\tvoid %%propname%%Changed();\n";
+        h += "signals:\n    void %%propname%%Changed();\n";
 
-    h += "private:\n\tvoid set%%Propname%%Imp(%%proptype%% val);\n";
+    h += "private:\n    void set%%Propname%%Imp(%%proptype%% val);\n";
 
     h += "private:\n";
-    h += "\t%%proptype%% _%%propname%%;\n";
+    h += "    %%proptype%% _%%propname%%;\n";
 
     if (classProp->type() == "QObject*")
     {
         h += "private slots:\n"
-                "\tvoid %%propname%%DeletedSlot();\n";
+                "    void %%propname%%DeletedSlot();\n";
     }
     QString Name = classProp->name();
     QChar *ptr = Name.data();
@@ -76,7 +76,7 @@ static QString generateClassPropCPP(const ClassProp *classProp, const QString &c
     cpp += ""
             "%%proptype%% %%Classname%%::%%propname%%() const\n"
             "{\n"
-            "\treturn _%%propname%%;\n"
+            "    return _%%propname%%;\n"
             "}\n";
 
 
@@ -86,38 +86,38 @@ static QString generateClassPropCPP(const ClassProp *classProp, const QString &c
         cpp +=  "void %%Classname%%::set%%Propname%%(%%proptype%% val)\n"
                 "{\n";
 
-        cpp += "\tif (val == _%%propname%%)\n"
-                "\t\treturn;\n\n";
+        cpp += "    if (val == _%%propname%%)\n"
+                "        return;\n\n";
 
         if (classProp->undo())
         {
-            cpp += "\tif (Undoer::instance()->noundo() == false)\n"
-                    "\t{\n"
-                    "\t\tset%%Propname%%Imp(val);\n"
-                    "\t\treturn;\n"
-                    "\t}\n\n";
+            cpp += "    if (Undoer::instance()->noundo() == false)\n"
+                    "    {\n"
+                    "        set%%Propname%%Imp(val);\n"
+                    "        return;\n"
+                    "    }\n\n";
         }
 
         if (classProp->validate().length() > 0)
-            cpp += "\tif (!validate%%Propname%%(val))\n"
-                    "\t\treturn;\n\n";
+            cpp += "    if (!validate%%Propname%%(val))\n"
+                    "        return;\n\n";
 
         if (classProp->undo())
         {
-            cpp += "\tQUndoCommand *cmd = new PropertyChangeCmd(this, \"%%propname%%\",";
+            cpp += "    QUndoCommand *cmd = new PropertyChangeCmd(this, \"%%propname%%\",";
 
             if (!classProp->type().endsWith("*")) // if its not a pointer
                 cpp += "QVariant(_%%propname%%), QVariant(val));\n";
             else
                 cpp += "QVariant::fromValue(_%%propname%%), QVariant::fromValue(val));\n";
 
-            cpp += "\tcmd->setText(\"Set %%Propname%%\");\n"
-                    "\tUndoer::instance()->push(cmd);\n";
+            cpp += "    cmd->setText(\"Set %%Propname%%\");\n"
+                    "    Undoer::instance()->push(cmd);\n";
         }
         else if (classProp->notify()) // if no undo
         {
-            cpp += "\t_%%propname%% = val;\n"
-                    "\temit %%propname%%Changed();\n";
+            cpp += "    _%%propname%% = val;\n"
+                    "    emit %%propname%%Changed();\n";
         }
         cpp += "}\n";
     }
@@ -129,14 +129,14 @@ static QString generateClassPropCPP(const ClassProp *classProp, const QString &c
             "{\n";
     if (classProp->type() == "QObject*")
     {
-        cpp += "\tif (_%%propname%% != NULL)\n"
-                "\t\tdisconnect(reinterpret_cast<QObject*>(_%%propname%%), SIGNAL(destroyed()), this, SLOT(%%propname%%DeletedSlot()));\n";
-        cpp += "\tif (val != NULL)\n"
-                "\t\tconnect(reinterpret_cast<QObject*>(val), SIGNAL(destroyed()), this, SLOT(%%propname%%DeletedSlot()));\n\n";
+        cpp += "    if (_%%propname%% != NULL)\n"
+                "        disconnect(reinterpret_cast<QObject*>(_%%propname%%), SIGNAL(destroyed()), this, SLOT(%%propname%%DeletedSlot()));\n";
+        cpp += "    if (val != NULL)\n"
+                "        connect(reinterpret_cast<QObject*>(val), SIGNAL(destroyed()), this, SLOT(%%propname%%DeletedSlot()));\n\n";
     }
-    cpp += "\t_%%propname%% = val;\n";
+    cpp += "    _%%propname%% = val;\n";
     if (classProp->notify())
-        cpp += "\temit %%propname%%Changed();\n";
+        cpp += "    emit %%propname%%Changed();\n";
     cpp +=  "}\n";
 
     ////////////////////////////////////////////////////////////////////////
@@ -144,7 +144,7 @@ static QString generateClassPropCPP(const ClassProp *classProp, const QString &c
     {
         cpp += "bool %%Classname%%::validate%%Propname%%(%%proptype%% val) const\n"
                 "{\n"
-                "\treturn %%validate%%;\n"
+                "    return %%validate%%;\n"
                 "}\n";
     }
     ////////////////////////////////////////////////////////////////////////
@@ -152,7 +152,7 @@ static QString generateClassPropCPP(const ClassProp *classProp, const QString &c
     {
         cpp += "void %%Classname%%::%%propname%%DeletedSlot()\n"
                 "{\n"
-                "\tset%%Propname%%(NULL);\n"
+                "    set%%Propname%%(NULL);\n"
                 "}\n";
     }
 
@@ -184,18 +184,18 @@ static QString generateClassPropSave(const ClassProp *classProp)
     QString cpp;
 
     if (classProp->type() == "QObject*")
-        cpp += "\tds << %%proptype%%::_indexedPtrs.value(p->_%%propname%%);";
+        cpp += "    ds << %%proptype%%::_indexedPtrs.value(p->_%%propname%%);";
     else if (classProp->type() == "ObjectList*")
     {
-        cpp += "\tds << ((qint32)(p->_%%propname%%->count()));\n"
-                "\tfor (int i=0; i<p->_%%propname%%->count(); i++)\n"
-                "\t{\n"
-                "\t\t%%proptype%% *o = p->_%%propname%%->get<%%proptype%%*>(i);\n"
-                "\t\tds << %%proptype%%::_indexedPtrs.value(o);\n"
-                "\t}\n";
+        cpp += "    ds << ((qint32)(p->_%%propname%%->count()));\n"
+                "    for (int i=0; i<p->_%%propname%%->count(); i++)\n"
+                "    {\n"
+                "        %%proptype%% *o = p->_%%propname%%->get<%%proptype%%*>(i);\n"
+                "        ds << %%proptype%%::_indexedPtrs.value(o);\n"
+                "    }\n";
     }
     else
-        cpp += "\tds << p->_%%propname%%;\n";
+        cpp += "    ds << p->_%%propname%%;\n";
 
     QString Name = classProp->name();
     QChar *ptr = Name.data();
@@ -225,20 +225,20 @@ static QString generateClassPropLoad(const ClassProp *classProp)
     QString cpp;
 
     if (classProp->type() == "QObject*")
-        cpp += "\tds >> index; p->set%%Propname%%Imp((index == -1 ? NULL : %%proptype%%::_ptrs[index]));\n";
+        cpp += "    ds >> index; p->set%%Propname%%Imp((index == -1 ? NULL : %%proptype%%::_ptrs[index]));\n";
     else if (classProp->type() == "ObjectList*")
     {
-        cpp += "\tp->%%propname%%()->removeAll();\n"
-                "\tds >> count;\n"
-                "\tfor (quint32 i=0; i<count; i++)\n"
-                "\t{\n"
-                "\t\tds >> index;\n"
-                "\t\t%%proptype%% *obj  = (index == -1 ? NULL : %%proptype%%::_ptrs[index]);\n"
-                "\t\tp->%%propname%%()->insertRow(obj,  p->%%propname%%()->count());\n"
-                "\t}\n";
+        cpp += "    p->%%propname%%()->removeAll();\n"
+                "    ds >> count;\n"
+                "    for (quint32 i=0; i<count; i++)\n"
+                "    {\n"
+                "        ds >> index;\n"
+                "        %%proptype%% *obj  = (index == -1 ? NULL : %%proptype%%::_ptrs[index]);\n"
+                "        p->%%propname%%()->insertRow(obj,  p->%%propname%%()->count());\n"
+                "    }\n";
     }
     else
-        cpp += "\tds >> p->_%%propname%%;\n";
+        cpp += "    ds >> p->_%%propname%%;\n";
 
 
 
@@ -275,10 +275,10 @@ static QString generateClassModelH(const ClassModel *classModel)
             "#include \"classes.h\"\n\n"
             "class %%Classname%% : public QObject\n"
             "{\n"
-            "\tQ_OBJECT\n"
+            "    Q_OBJECT\n"
             "public:\n"
-            "\tQ_INVOKABLE %%Classname%%(QObject *parent = 0);\n"
-            "\t~%%Classname%%();\n";
+            "    Q_INVOKABLE %%Classname%%(QObject *parent = 0);\n"
+            "    ~%%Classname%%();\n";
 
     for (int i=0;i<classModel->properties()->count(); i++)
     {
@@ -287,16 +287,16 @@ static QString generateClassModelH(const ClassModel *classModel)
     }
 
     cpp += "\n\npublic:\n"
-            "\tfriend QDataStream& operator<< (QDataStream& ds, const %%Classname%% * p);\n"
-            "\tfriend QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n\n"
-            "\tstatic void init(int count);\n"
-            "\tstatic void load(QDataStream& ds);\n"
-            "\tstatic void save(QDataStream& ds);\n"
-            "\tstatic void createIndex();\n"
-            "\tstatic void clearIndex();\n"
-            "\tstatic void deleteAll();\n"
-            "\tstatic QList<%%Classname%%*> _ptrs;\n"
-            "\tstatic QHash<%%Classname%%*, quint32> _indexedPtrs;\n"
+            "    friend QDataStream& operator<< (QDataStream& ds, const %%Classname%% * p);\n"
+            "    friend QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n\n"
+            "    static void init(int count);\n"
+            "    static void load(QDataStream& ds);\n"
+            "    static void save(QDataStream& ds);\n"
+            "    static void createIndex();\n"
+            "    static void clearIndex();\n"
+            "    static void deleteAll();\n"
+            "    static QList<%%Classname%%*> _ptrs;\n"
+            "    static QHash<%%Classname%%*, quint32> _indexedPtrs;\n"
             "};\n"
             "QDataStream& operator<< (QDataStream& ds, const %%Classname%% * p);\n"
             "QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n"
@@ -333,58 +333,58 @@ static QString generateClassModelCPP(const ClassModel *classModel)
             "QHash<%%Classname%% *, quint32> %%Classname%%::_indexedPtrs;\n\n"
             "void %%Classname%%::init(int count)\n"
             "{\n"
-            "\t//clear current\n"
-            "\tdeleteAll();\n"
+            "    //clear current\n"
+            "    deleteAll();\n"
             "\n"
-            "\tfor (int i=0;i<count;i++)\n"
-            "\t\tnew %%Classname%%;\n"
+            "    for (int i=0;i<count;i++)\n"
+            "        new %%Classname%%;\n"
             "}\n\n"
             "void %%Classname%%::load(QDataStream& ds)\n"
             "{\n"
-            "\tquint32 count = _ptrs.count();\n"
-            "\tfor (quint32 i=0;i<count; i++)\n"
-            "\t\tds >> _ptrs[i];\n"
+            "    quint32 count = _ptrs.count();\n"
+            "    for (quint32 i=0;i<count; i++)\n"
+            "        ds >> _ptrs[i];\n"
             "}\n\n"
             "void %%Classname%%::save(QDataStream& ds)\n"
             "{\n"
-            "\tQListIterator<%%Classname%% *> i(_ptrs);\n"
-            "\twhile (i.hasNext())\n"
-            "\t\tds << i.next();\n"
+            "    QListIterator<%%Classname%% *> i(_ptrs);\n"
+            "    while (i.hasNext())\n"
+            "        ds << i.next();\n"
             "}\n\n"
             "void %%Classname%%::createIndex() //must be called for all classes before save for this class\n"
             "{\n"
-            "\t_indexedPtrs.clear();\n"
-            "\t_indexedPtrs.insert(NULL, -1);\n"
-            "\tquint32 index = 0;\n"
-            "\tQListIterator<%%Classname%% *> i(_ptrs);\n"
-            "\twhile (i.hasNext())"
-            "\t\t_indexedPtrs.insert(i.next(), index++);\n"
+            "    _indexedPtrs.clear();\n"
+            "    _indexedPtrs.insert(NULL, -1);\n"
+            "    quint32 index = 0;\n"
+            "    QListIterator<%%Classname%% *> i(_ptrs);\n"
+            "    while (i.hasNext())"
+            "        _indexedPtrs.insert(i.next(), index++);\n"
             "}\n\n"
             "void %%Classname%%::clearIndex()\n"
             "{\n"
-            "\t_indexedPtrs.clear();\n"
+            "    _indexedPtrs.clear();\n"
             "}\n\n"
             "void %%Classname%%::deleteAll()\n"
             "{\n"
-            "\tQList<%%Classname%%*> tmp = _ptrs;\n"
-            "\t_ptrs.clear();\n"
-            "\tfor (int i=0;i<tmp.count();i++)\n"
-            "\t\tdelete tmp[i];\n"
+            "    QList<%%Classname%%*> tmp = _ptrs;\n"
+            "    _ptrs.clear();\n"
+            "    for (int i=0;i<tmp.count();i++)\n"
+            "        delete tmp[i];\n"
             "}\n\n"
             "//// - [ non-static ] ----------------------------------------------------------------------------\n\n";
 
     cpp +=  "%%Classname%%::%%Classname%%(QObject *parent) :\n"
-            "\tQObject(parent)\n"
+            "    QObject(parent)\n"
             "{\n"
-            "\t    QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);\n";
+            "        QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);\n";
     for (int i=0;i<classModel->properties()->count(); i++)
     {
         ClassProp *p =  classModel->properties()->get<ClassProp*>(i);
 
         if (p->init().length() > 0)
-            cpp += QString("\t") + p->init() + ";\n";
+            cpp += QString("    ") + p->init() + ";\n";
     }
-    cpp += "\n\t_ptrs.append(this);\n";
+    cpp += "\n    _ptrs.append(this);\n";
 
     cpp += "}\n\n";
 
@@ -395,9 +395,9 @@ static QString generateClassModelCPP(const ClassModel *classModel)
         ClassProp *p =  classModel->properties()->get<ClassProp*>(i);
 
         if (p->destruct().length() > 0)
-            cpp += QString("\t") + p->destruct() + ";\n";
+            cpp += QString("    ") + p->destruct() + ";\n";
     }
-    cpp += "\n\t_ptrs.removeOne(this);\n";
+    cpp += "\n    _ptrs.removeOne(this);\n";
     cpp += "}\n\n";
 
     for (int i=0;i<classModel->properties()->count(); i++)
@@ -418,20 +418,20 @@ static QString generateClassModelCPP(const ClassModel *classModel)
         if (p->save() == true)
             cpp += QString("\n\n// ----[ ") + p->name() + " SAVE ] ----\n" + generateClassPropSave(p);
     }
-    cpp += "\n\n\treturn ds;\n"
+    cpp += "\n\n    return ds;\n"
             "}";
 
     cpp += "\n\nQDataStream& operator>> (QDataStream& ds, %%Classname%% * p)\n"
             "{\n"
-            "\tquint32 count;\n"
-            "\tquint32 index;\n";
+            "    quint32 count;\n"
+            "    quint32 index;\n";
     for (int i=0;i<classModel->properties()->count(); i++)
     {
         ClassProp *p =  classModel->properties()->get<ClassProp*>(i);
         if (p->save() == true)
             cpp += QString("\n// ----[ ") + p->name() + " LOAD ] ----\n" + generateClassPropLoad(p);
     }
-    cpp += "\n\n\treturn ds;\n"
+    cpp += "\n\n    return ds;\n"
             "}\n";
 
 
