@@ -11,7 +11,7 @@ Item {
         y: 16
         width: 162
         height: 21
-        placeholderText: "Text Field"
+        placeholderText: "Name"
 
         text: selectedProp ? selectedProp.name : ""
         onTextChanged: selectedProp.name = text

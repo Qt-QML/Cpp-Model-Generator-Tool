@@ -256,10 +256,10 @@ void ClassProp::setName(QString val)
 }
 void ClassProp::setNameImp(QString val)
 {
-    updateInit();
-
     _name = val;
     emit nameChanged();
+
+    updateInit();
 }
 
 // ----[ type ] ----
