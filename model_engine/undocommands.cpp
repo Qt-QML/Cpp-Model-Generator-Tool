@@ -22,7 +22,8 @@ PropertyChangeCmd::PropertyChangeCmd(QObject *obj, const QByteArray & name, cons
 
 void PropertyChangeCmd::objDestroyed()
 {
-    disconnect(_obj, SIGNAL(destroyed()), this, SLOT(objDestroyed()));
+    if (_obj)
+        disconnect(_obj, SIGNAL(destroyed()), this, SLOT(objDestroyed()));
 
     if (_newval.userType() >= QMetaType::User)
         disconnect( qvariant_cast<QObject *>(_newval), SIGNAL(destroyed()), this, SLOT(objDestroyed()));

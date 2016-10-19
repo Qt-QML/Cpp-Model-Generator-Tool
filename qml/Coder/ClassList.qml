@@ -30,7 +30,7 @@ Item {
             model: splitview2.model.classes
 
             itemDelegate: Text {
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenter: parent ? parent.verticalCenter : undefined
                 text: styleData.value ? styleData.value.name : "";
                 color: styleData.textColor
             }
