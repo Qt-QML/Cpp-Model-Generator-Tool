@@ -1,6 +1,6 @@
-import QtQuick 2.0
-import QtQuick.Controls 1.0
-import QtQuick.Layouts 1.0
+import QtQuick 2.4
+import QtQuick.Controls 1.3
+import QtQuick.Layouts 1.1
 
 SplitView {
     id: splitview1
@@ -21,12 +21,12 @@ SplitView {
             model: properties
 
             itemDelegate: Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: properties.get(styleData.row).name
+                anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+                text: styleData.value ? styleData.value.name : "";
                 color: styleData.textColor
             }
 
-            TableViewColumn { title: "Properties" }
+            TableViewColumn { title: "Properties"; role: "row" }
         }
         RowLayout {
             Button {

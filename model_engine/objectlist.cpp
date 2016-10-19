@@ -4,7 +4,7 @@
 #include "undoer.h"
 
 ObjectList::ObjectList(QMetaObject info, int count) :
-    QAbstractItemModel()
+    QAbstractListModel()
 {
     _metaInfo = info;
 
@@ -16,7 +16,6 @@ ObjectList::ObjectList(QMetaObject info, int count) :
 
 ObjectList::~ObjectList()
 {
-
 }
 
 QHash<int, QByteArray> ObjectList::roleNames() const
@@ -28,36 +27,12 @@ QHash<int, QByteArray> ObjectList::roleNames() const
     return roleNames;
 }
 
-int ObjectList::columnCount ( const QModelIndex & parent) const
+int ObjectList::rowCount(const QModelIndex &parent) const
 {
-    return 1;
+    return parent.isValid() ? 0 : _list.count();
 }
 
-int ObjectList::rowCount ( const QModelIndex & parent) const
-{
-    return _list.count();
-}
-
-bool ObjectList::hasChildren ( const QModelIndex & parent) const
-{
-    return false;
-}
-
-QModelIndex ObjectList::parent ( const QModelIndex & index ) const
-{
-    return QModelIndex();
-}
-
-Qt::ItemFlags ObjectList::flags ( const QModelIndex & index ) const
-{
-    return Qt::ItemIsEditable;
-}
-
-QModelIndex	ObjectList::index ( int row, int column, const QModelIndex & parent) const
-{
-    return QAbstractItemModel::createIndex(row,0);
-}
-QVariant ObjectList::data ( const QModelIndex & index, int role  ) const
+QVariant ObjectList::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::UserRole) // row
         return qVariantFromValue(_list[index.row()]);
@@ -101,20 +76,19 @@ void ObjectList::insertRow(QObject *obj, int index)
     emit countChanged();
 }
 
-bool ObjectList::moveRows(const QModelIndex & sourceParent, int sourceRow, int count, const QModelIndex & destinationParent, int destinationChild)
+bool ObjectList::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild)
 {
     if (sourceRow == destinationChild)
         return false;
 
     beginMoveRows(sourceParent, sourceRow, sourceRow +count-1, destinationParent, destinationChild + (sourceRow<destinationChild? count : 0));
 
-    QList<QObject*> tmp;
+    QList<QObject*> tmp = _list.mid(sourceRow, count);
+    _list.erase(_list.begin() + sourceRow,
+                _list.begin() + sourceRow + count);
 
-    for (int i=0;i<count;i++)
-        tmp.append(_list.takeAt(sourceRow));
-
-    for (int i=0;i<count;i++)
-        _list.insert(destinationChild, tmp.takeLast());
+    for (int i = 0; i < count; ++i)
+        _list.insert(destinationChild + count, tmp.at(i));
 
     endMoveRows();
 
@@ -123,7 +97,8 @@ bool ObjectList::moveRows(const QModelIndex & sourceParent, int sourceRow, int c
 //------------------------------------------------------------
 // SLOTS - interface to QML ------------------------------------------------------------
 //------------------------------------------------------------
-QObject * ObjectList::get(int index) {
+QObject * ObjectList::get(int index)
+{
     if (index >= rowCount() || index < 0)
     {
         //        if (_empty == NULL)

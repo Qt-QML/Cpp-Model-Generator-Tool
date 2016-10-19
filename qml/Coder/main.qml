@@ -1,8 +1,8 @@
-import QtQuick.Controls 1.0
-import QtQuick.Layouts 1.0
-import QtQuick.Controls.Styles 1.0
-import QtQuick.Dialogs 1.0
-import QtQuick 2.1
+import QtQuick.Controls 1.3
+import QtQuick.Layouts 1.1
+import QtQuick.Controls.Styles 1.3
+import QtQuick.Dialogs 1.2
+import QtQuick 2.4
 
 ApplicationWindow {
 //    x: root.model.winRect.x
@@ -26,6 +26,7 @@ ApplicationWindow {
     menuBar: MenuBar {
         Menu {
             title: "File"
+            MenuItem { action: newAction; }
             MenuItem { action: openAction; }
             MenuItem { action: saveAction; }
 
@@ -51,7 +52,7 @@ ApplicationWindow {
     toolBar: ToolBar {
         RowLayout {
             ToolButton { action: openAction }
-            ToolButton { action:saveAction }
+            ToolButton { action: saveAction }
 
             ToolButton { action: undoAction }
             ToolButton { action: redoAction }
@@ -62,36 +63,38 @@ ApplicationWindow {
         }
     }
     Action {
+        id: newAction
+        text: "New Project"
+        iconName: "file-new"
+        onTriggered: modelRoot = modelLoader.create();
+    }
+    Action {
         id: openAction
-        text: "Open project..."
-        shortcut: "Ctrl+O"
+        text: "Open Project..."
+        shortcut: StandardKey.Open
         iconSource: "qrc:/resources/folder.png"
         onTriggered: openDialog.open()
-        tooltip: text
     }
     Action {
         id: saveAction
-        text: "Save project..."
-        shortcut: "Ctrl+S"
+        text: "Save Project..."
+        shortcut: StandardKey.Save
         iconSource: "qrc:/resources/save.png"
         onTriggered: saveDialog.open()
-        tooltip: text
     }
     Action {
         id: undoAction
         text: "Undo " + modelLoader.undoer().undoText
-        shortcut: "Ctrl+Z"
+        shortcut: StandardKey.Undo
         iconSource: "qrc:/resources/undo.png"
         onTriggered: modelLoader.undoer().undo()
-        tooltip: text
     }
     Action {
         id: redoAction
         text: "Redo " + modelLoader.undoer().redoText
-        shortcut: "Ctrl+Shift+Z"
+        shortcut: StandardKey.Redo
         iconSource: "qrc:/resources/redo.png"
         onTriggered: modelLoader.undoer().redo()
-        tooltip: text
     }
     Action {
         id: burnAction
@@ -99,16 +102,13 @@ ApplicationWindow {
         shortcut: "Ctrl+B"
         iconSource: "qrc:/resources/burn.png"
         onTriggered: fileDialog.open()
-        tooltip: text
     }
     Action {
         id: diagramAction
-        text: "Show diagram..."
-        shortcut: ""
+        text: "Show Diagram"
         iconSource: "qrc:/resources/diagram.png"
         checkable: true
         onCheckedChanged: win.state = (checked?"diagram":"")
-        tooltip: text
     }
 
     FileDialog {
@@ -123,7 +123,7 @@ ApplicationWindow {
 
     FileDialog {
         id: openDialog
-        title: "Open project file..."
+        title: "Open Project File..."
 
         selectMultiple: false
         selectFolder: false
@@ -136,7 +136,7 @@ ApplicationWindow {
 
     FileDialog {
         id: saveDialog
-        title: "Save project file..."
+        title: "Save Project File..."
 
         selectMultiple: false
         selectFolder: false
