@@ -5,6 +5,50 @@ import QtQuick.Layouts 1.1
 Item {
     property QtObject selectedProp
 
+    function updateInitAndDestruct() {
+        if (!selectedProp)
+            return;
+
+        var type = selectedProp.type;
+        var name = selectedProp.name;
+        var subType = selectedProp.subType;
+
+        if (type === "QObject*")
+        {
+            if (selectedProp.null)
+            {
+                selectedProp.init = "_" + name + " = Q_NULLPTR";
+                selectedProp.destruct = "";
+            }
+            else
+            {
+                var Name = name[0].toUpperCase() + name.substring(1);
+
+                selectedProp.init =
+                        "_" + name + " = Q_NULLPTR;\n" +
+                        "    set" + Name + "Imp(new " + subType + ")";
+                selectedProp.destruct = "_" + name + "->deleteLater()";
+            }
+        }
+
+        if (type === "ObjectList*")
+        {
+            var count = selectedProp.count;
+
+            selectedProp.init = ("_" + name + " = new ObjectList(" + subType + "::staticMetaObject, %1)").arg(count);
+            selectedProp.destruct = "_" + name + "->deleteLater()";
+        }
+    }
+
+    Connections {
+        target: selectedProp
+        onNullChanged: updateInitAndDestruct()
+        onNameChanged: updateInitAndDestruct()
+        onTypeChanged: updateInitAndDestruct()
+        onSubTypeChanged: updateInitAndDestruct()
+        onCountChanged: updateInitAndDestruct()
+    }
+
     TextField {
         id: name
         x: 68

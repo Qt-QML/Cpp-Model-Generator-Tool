@@ -177,8 +177,6 @@ void ClassProp::setNull(bool val)
 
     _null = val;
     emit nullChanged();
-
-    updateInit();
 }
 
 
@@ -258,8 +256,6 @@ void ClassProp::setNameImp(QString val)
 {
     _name = val;
     emit nameChanged();
-
-    updateInit();
 }
 
 // ----[ type ] ----
@@ -287,8 +283,6 @@ void ClassProp::setTypeImp(QString val)
 {
     _type = val;
     emit typeChanged();
-
-    updateInit();
 }
 
 // ----[ subtype ] ----
@@ -317,8 +311,6 @@ void ClassProp::setSubTypeImp(QString val)
 {
     _subType = val;
     emit subTypeChanged();
-
-    updateInit();
 }
 
 // ----[ subtype ] ----
@@ -405,41 +397,6 @@ void ClassProp::setCount(int val)
     _count = val;
 
     emit countChanged();
-
-    updateInit();
-}
-
-void ClassProp::updateInit()
-{
-    if (_type == "QObject*")
-    {
-        if (_null)
-        {
-            setInit(QString("_") + _name + " = NULL");
-            setDestruct("");
-        }
-        else
-        {
-            QString Name = _name;
-            QChar *ptr = Name.data();
-            *ptr = ptr->toUpper();
-
-            QString init = \
-                    QString("_") + _name + " = NULL;\n"
-                    "    set%%Propname%%Imp(new " + _subType + "())";
-
-            init.replace("%%Propname%%", Name, Qt::CaseSensitive);
-
-            setInit(init);
-            setDestruct(QString("_") + _name+ "->deleteLater()");
-        }
-    }
-
-    if (_type == "ObjectList*")
-    {
-        setInit((QString("_") + _name + " = new ObjectList("+_subType+"::staticMetaObject, %1)").arg(_count));
-        setDestruct(QString("_") + _name+ "->deleteLater()");
-    }
 }
 
 QDataStream& operator<< (QDataStream& ds, const ClassProp * p)

@@ -187,8 +187,6 @@ private:
 private:
     bool _write;
 
-private:
-    void updateInit();
 public:
     friend QDataStream& operator<< (QDataStream& ds, const ClassProp * p);
     friend QDataStream& operator>> (QDataStream& ds, ClassProp * p);
