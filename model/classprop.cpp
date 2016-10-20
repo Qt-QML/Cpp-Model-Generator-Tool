@@ -1,9 +1,9 @@
-#include "classProp.h"
+#include "classprop.h"
 #include <QQmlEngine>
 
 //// - [ static ] ----------------------------------------------------------------------------
 QList<ClassProp*> ClassProp::_ptrs;
-QHash<ClassProp *, quint32> ClassProp::_indexedPtrs;
+QHash<ClassProp *, int> ClassProp::_indexedPtrs;
 
 void ClassProp::init(int count)
 {
@@ -26,6 +26,20 @@ void ClassProp::save(QDataStream& ds)
     QListIterator<ClassProp *> i(_ptrs);
     while (i.hasNext())
         ds << i.next();
+}
+
+void ClassProp::loadFromJson(const QJsonArray &array)
+{
+    for (int i = 0; i < _ptrs.size(); ++i)
+        fromJson(array.at(i), _ptrs[i]);
+}
+
+QJsonArray ClassProp::saveToJson()
+{
+    QJsonArray array;
+    for (auto p : _ptrs)
+        array.append(toJson(p));
+    return array;
 }
 
 void ClassProp::createIndex() //must be called for all classes before save for this class
@@ -531,4 +545,42 @@ QDataStream& operator>> (QDataStream& ds, ClassProp * p)
 
 
     return ds;
+}
+
+
+QJsonObject toJson(const ClassProp *p)
+{
+    QJsonObject object;
+    object.insert(QLatin1String("read"), toJson(p->_read));
+    object.insert(QLatin1String("save"), toJson(p->_save));
+    object.insert(QLatin1String("notify"), toJson(p->_notify));
+    object.insert(QLatin1String("undo"), toJson(p->_undo));
+    object.insert(QLatin1String("validate"), toJson(p->_validate));
+    object.insert(QLatin1String("destruct"), toJson(p->_destruct));
+    object.insert(QLatin1String("name"), toJson(p->_name));
+    object.insert(QLatin1String("type"), toJson(p->_type));
+    object.insert(QLatin1String("subType"), toJson(p->_subType));
+    object.insert(QLatin1String("init"), toJson(p->_init));
+    object.insert(QLatin1String("write"), toJson(p->_write));
+    object.insert(QLatin1String("count"), toJson(p->_count));
+    object.insert(QLatin1String("null"), toJson(p->_null));
+    return object;
+}
+
+void fromJson(const QJsonValue &value, ClassProp *p)
+{
+    const QJsonObject object = value.toObject();
+    fromJson(object.value(QLatin1String("read")), p->_read);
+    fromJson(object.value(QLatin1String("save")), p->_save);
+    fromJson(object.value(QLatin1String("notify")), p->_notify);
+    fromJson(object.value(QLatin1String("undo")), p->_undo);
+    fromJson(object.value(QLatin1String("validate")), p->_validate);
+    fromJson(object.value(QLatin1String("destruct")), p->_destruct);
+    fromJson(object.value(QLatin1String("name")), p->_name);
+    fromJson(object.value(QLatin1String("type")), p->_type);
+    fromJson(object.value(QLatin1String("subType")), p->_subType);
+    fromJson(object.value(QLatin1String("init")), p->_init);
+    fromJson(object.value(QLatin1String("write")), p->_write);
+    fromJson(object.value(QLatin1String("count")), p->_count);
+    fromJson(object.value(QLatin1String("null")), p->_null);
 }

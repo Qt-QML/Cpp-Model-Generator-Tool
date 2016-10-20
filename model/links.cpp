@@ -3,7 +3,7 @@
 
 //// - [ static ] ----------------------------------------------------------------------------
 QList<Links*> Links::_ptrs;
-QHash<Links *, quint32> Links::_indexedPtrs;
+QHash<Links *, int> Links::_indexedPtrs;
 
 void Links::init(int count)
 {
@@ -26,6 +26,20 @@ void Links::save(QDataStream& ds)
     QListIterator<Links *> i(_ptrs);
     while (i.hasNext())
         ds << i.next();
+}
+
+void Links::loadFromJson(const QJsonArray &array)
+{
+    for (int i = 0; i < _ptrs.size(); ++i)
+        fromJson(array.at(i), _ptrs[i]);
+}
+
+QJsonArray Links::saveToJson()
+{
+    QJsonArray array;
+    for (auto p : _ptrs)
+        array.append(toJson(p));
+    return array;
 }
 
 void Links::createIndex() //must be called for all classes before save for this class
@@ -90,9 +104,9 @@ void Links::setFrom(ClassProp* val)
 }
 void Links::setFromImp(ClassProp* val)
 {
-    if (_from != NULL)
+    if (_from)
         disconnect(_from, SIGNAL(destroyed()), this, SLOT(fromDeletedSlot()));
-    if (val != NULL)
+    if (val)
         connect(val, SIGNAL(destroyed()), this, SLOT(fromDeletedSlot()));
 
     _from = val;
@@ -100,7 +114,7 @@ void Links::setFromImp(ClassProp* val)
 }
 void Links::fromDeletedSlot()
 {
-    setFrom(NULL);
+    setFrom(Q_NULLPTR);
 }
 
 // ----[ to ] ----
@@ -125,9 +139,9 @@ void Links::setTo(ClassModel* val)
 }
 void Links::setToImp(ClassModel* val)
 {
-    if (_to != NULL)
+    if (_to)
         disconnect(_to, SIGNAL(destroyed()), this, SLOT(toDeletedSlot()));
-    if (val != NULL)
+    if (val)
         connect(val, SIGNAL(destroyed()), this, SLOT(toDeletedSlot()));
 
     _to = val;
@@ -135,7 +149,7 @@ void Links::setToImp(ClassModel* val)
 }
 void Links::toDeletedSlot()
 {
-    setTo(NULL);
+    setTo(Q_NULLPTR);
 }
 
 
@@ -158,11 +172,35 @@ QDataStream& operator>> (QDataStream& ds, Links * p)
     quint32 index;
 
     // ----[ from LOAD ] ----
-    ds >> index; p->setFromImp((index == -1 ? NULL : ClassProp::_ptrs[index]));
+    ds >> index; p->setFromImp((index == -1 ? Q_NULLPTR : ClassProp::_ptrs[index]));
 
     // ----[ to LOAD ] ----
-    ds >> index; p->setToImp((index == -1 ? NULL : ClassModel::_ptrs[index]));
+    ds >> index; p->setToImp((index == -1 ? Q_NULLPTR : ClassModel::_ptrs[index]));
 
 
     return ds;
+}
+
+
+QJsonObject toJson(const Links *p)
+{
+    QJsonObject object;
+    object.insert(QLatin1String("from"),
+                  ClassProp::_indexedPtrs.value(p->_from));
+    object.insert(QLatin1String("to"),
+                  ClassModel::_indexedPtrs.value(p->_to));
+    return object;
+}
+
+void fromJson(const QJsonValue &value, Links *p)
+{
+    const QJsonObject object = value.toObject();
+    {
+        int index = object.value(QLatin1String("from")).toInt(-1);
+        p->setFromImp(index == -1 ? Q_NULLPTR : ClassProp::_ptrs[index]);
+    }
+    {
+        int index = object.value(QLatin1String("to")).toInt(-1);
+        p->setToImp(index == -1 ? Q_NULLPTR : ClassModel::_ptrs[index]);
+    }
 }

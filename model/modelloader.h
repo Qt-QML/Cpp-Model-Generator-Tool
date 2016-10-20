@@ -17,9 +17,16 @@ signals:
 public slots:
     QObject * create();
     QObject * load(const QString & fileName);
-    void save(const QString & fileName, QObject *model) const;
+    bool save(const QString & fileName, QObject *model) const;
+
+    QObject * loadFromJson(const QString &fileName);
+    bool saveAsJson(const QString &fileName, QObject *model) const;
 
     Undoer * undoer() const;
+
+private:
+    void createIndices() const;
+    void clearIndices() const;
 };
 
 #endif // MODELLOADER_H

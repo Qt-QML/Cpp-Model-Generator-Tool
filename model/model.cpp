@@ -165,7 +165,7 @@ QDataStream& operator>> (QDataStream& ds, Model * p)
     for (quint32 i=0; i<count; i++)
     {
         ds >> index;
-        Links *obj  = (index == -1 ? NULL : Links::_ptrs[index]);
+        Links *obj = (index == -1 ? Q_NULLPTR : Links::_ptrs[index]);
         p->links()->insertRow(obj,  p->links()->count());
     }
 
@@ -175,7 +175,7 @@ QDataStream& operator>> (QDataStream& ds, Model * p)
     for (quint32 i=0; i<count; i++)
     {
         ds >> index;
-        ClassModel *obj  = (index == -1 ? NULL : ClassModel::_ptrs[index]);
+        ClassModel *obj = (index == -1 ? Q_NULLPTR : ClassModel::_ptrs[index]);
         p->classes()->insertRow(obj,  p->classes()->count());
     }
 
@@ -187,4 +187,44 @@ QDataStream& operator>> (QDataStream& ds, Model * p)
 
 
     return ds;
+}
+
+
+QJsonObject toJson(const Model *p)
+{
+    QJsonObject object;
+    {
+        QJsonArray array;
+        for (QObject *o : p->_links->list())
+            array.append(Links::_indexedPtrs.value(static_cast<Links*>(o)));
+        object.insert(QLatin1String("links"), array);
+    }
+    {
+        QJsonArray array;
+        for (QObject *o : p->_classes->list())
+            array.append(ClassModel::_indexedPtrs.value(static_cast<ClassModel*>(o)));
+        object.insert(QLatin1String("classes"), array);
+    }
+    object.insert(QLatin1String("winRect"), toJson(p->_winRect));
+    object.insert(QLatin1String("name"), toJson(p->_name));
+    return object;
+}
+
+void fromJson(const QJsonValue &value, Model *p)
+{
+    const QJsonObject object = value.toObject();
+    p->_links->removeAll();
+    for (const QJsonValue &value : object.value("links").toArray()) {
+        int index = value.toInt(-1);
+        Links *obj = (index == -1 ? Q_NULLPTR : Links::_ptrs[index]);
+        p->links()->insertRow(obj, p->_links->count());
+    }
+    p->_classes->removeAll();
+    for (const QJsonValue &value : object.value("classes").toArray()) {
+        int index = value.toInt(-1);
+        ClassModel *obj = (index == -1 ? Q_NULLPTR : ClassModel::_ptrs[index]);
+        p->classes()->insertRow(obj, p->_classes->count());
+    }
+    fromJson(object.value(QLatin1String("winRect")), p->_winRect);
+    fromJson(object.value(QLatin1String("name")), p->_name);
 }

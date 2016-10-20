@@ -7,7 +7,7 @@ class ClassProp : public QObject
 {
     Q_OBJECT
 public:
-    Q_INVOKABLE ClassProp(QObject *parent = 0);
+    Q_INVOKABLE ClassProp(QObject *parent = Q_NULLPTR);
     ~ClassProp();
 
 
@@ -192,20 +192,28 @@ private:
 private:
     QPointF _cpos;
 
-
 public:
     friend QDataStream& operator<< (QDataStream& ds, const ClassProp * p);
     friend QDataStream& operator>> (QDataStream& ds, ClassProp * p);
 
+    friend QJsonObject toJson(const ClassProp *p);
+    friend void fromJson(const QJsonValue &value, ClassProp *p);
+
     static void init(int count);
     static void load(QDataStream& ds);
     static void save(QDataStream& ds);
+    static void loadFromJson(const QJsonArray &);
+    static QJsonArray saveToJson();
     static void createIndex();
     static void clearIndex();
     static void deleteAll();
     static QList<ClassProp*> _ptrs;
-    static QHash<ClassProp*, quint32> _indexedPtrs;
+    static QHash<ClassProp*, int> _indexedPtrs;
 };
 QDataStream& operator<< (QDataStream& ds, const ClassProp * p);
 QDataStream& operator>> (QDataStream& ds, ClassProp * p);
+
+QJsonObject toJson(const ClassProp *p);
+void fromJson(const QJsonValue &value, ClassProp *p);
+
 #endif // CLASSPROP_H

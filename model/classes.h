@@ -16,6 +16,8 @@ class ClassProp;
 class Links;
 class ClassModel;
 class Model;
+
+#include "../model_engine/jsonconverters.h"
 #include "../model_engine/objectlist.h"
 #include "../model_engine/undoer.h"
 

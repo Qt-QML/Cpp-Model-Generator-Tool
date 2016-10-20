@@ -1,9 +1,9 @@
-#include "classModel.h"
+#include "classmodel.h"
 #include <QQmlEngine>
 
 //// - [ static ] ----------------------------------------------------------------------------
 QList<ClassModel*> ClassModel::_ptrs;
-QHash<ClassModel *, quint32> ClassModel::_indexedPtrs;
+QHash<ClassModel *, int> ClassModel::_indexedPtrs;
 
 void ClassModel::init(int count)
 {
@@ -26,6 +26,20 @@ void ClassModel::save(QDataStream& ds)
     QListIterator<ClassModel *> i(_ptrs);
     while (i.hasNext())
         ds << i.next();
+}
+
+void ClassModel::loadFromJson(const QJsonArray &array)
+{
+    for (int i = 0; i < _ptrs.size(); ++i)
+        fromJson(array.at(i), _ptrs[i]);
+}
+
+QJsonArray ClassModel::saveToJson()
+{
+    QJsonArray array;
+    for (auto p : _ptrs)
+        array.append(toJson(p));
+    return array;
 }
 
 void ClassModel::createIndex() //must be called for all classes before save for this class
@@ -202,7 +216,7 @@ QDataStream& operator>> (QDataStream& ds, ClassModel * p)
     for (quint32 i=0; i<count; i++)
     {
         ds >> index;
-        ClassProp *obj  = (index == -1 ? NULL : ClassProp::_ptrs[index]);
+        ClassProp *obj = (index == -1 ? Q_NULLPTR : ClassProp::_ptrs[index]);
         p->properties()->insertRow(obj,  p->properties()->count());
     }
 
@@ -214,4 +228,32 @@ QDataStream& operator>> (QDataStream& ds, ClassModel * p)
 
 
     return ds;
+}
+
+
+QJsonObject toJson(const ClassModel *p)
+{
+    QJsonObject object;
+    {
+        QJsonArray array;
+        for (QObject *o : p->_properties->list())
+            array.append(ClassProp::_indexedPtrs.value(static_cast<ClassProp*>(o)));
+        object.insert(QLatin1String("properties"), array);
+    }
+    object.insert(QLatin1String("name"), toJson(p->_name));
+    object.insert(QLatin1String("pos"), toJson(p->_pos));
+    return object;
+}
+
+void fromJson(const QJsonValue &value, ClassModel *p)
+{
+    const QJsonObject object = value.toObject();
+    p->_properties->removeAll();
+    for (const QJsonValue &value : object.value("properties").toArray()) {
+        int index = value.toInt(-1);
+        ClassProp *obj = (index == -1 ? Q_NULLPTR : ClassProp::_ptrs[index]);
+        p->properties()->insertRow(obj, p->_properties->count());
+    }
+    fromJson(object.value(QLatin1String("name")), p->_name);
+    fromJson(object.value(QLatin1String("pos")), p->_pos);
 }
