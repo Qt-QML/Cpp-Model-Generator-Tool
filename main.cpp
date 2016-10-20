@@ -2,7 +2,6 @@
 #include <QtQml>
 #include <QtQuick/QQuickView>
 
-#include "model/root.h"
 #include "model_engine/undoer.h"
 #include "arrow.h"
 #include "codegenerator.h"

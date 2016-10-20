@@ -62,18 +62,6 @@ private:
 private:
     bool _undo;
 
-    // ----[ null ] ----
-public:
-    Q_PROPERTY(bool null  READ null  WRITE setNull  NOTIFY nullChanged  )
-    bool null() const;
-    void setNull(bool val);
-signals:
-    void nullChanged();
-private:
-    void setNullImp(bool val);
-private:
-    bool _null;
-
 
     // ----[ validate ] ----
 public:
@@ -126,7 +114,8 @@ private:
 private:
     QString _type;
 
-    // ----[ type ] ----
+
+    // ----[ subType ] ----
 public:
     Q_PROPERTY(QString subType  READ subType  WRITE setSubType  NOTIFY subTypeChanged  )
     QString subType() const;
@@ -137,16 +126,6 @@ private:
     void setSubTypeImp(QString val);
 private:
     QString _subType;
-
-    // ----[ type ] ----
-public:
-    Q_PROPERTY(int count  READ count  WRITE setCount  NOTIFY countChanged  )
-    int count() const;
-    void setCount(int val);
-signals:
-    void countChanged();
-private:
-    int _count;
 
 
     // ----[ init ] ----
@@ -161,19 +140,6 @@ private:
 private:
     QString _init;
 
-    // ----[ cpos ] ----
-public:
-    Q_PROPERTY(QPointF cpos  READ cpos  WRITE setCPos  NOTIFY cposChanged  )
-    QPointF cpos() const;
-    void setCPos(QPointF val);
-signals:
-    void cposChanged();
-private:
-    void setCPosImp(QPointF val);
-private:
-    QPointF _cpos;
-
-
 
     // ----[ write ] ----
 public:
@@ -187,8 +153,46 @@ private:
 private:
     bool _write;
 
+
+    // ----[ count ] ----
+public:
+    Q_PROPERTY(qint32 count  READ count  WRITE setCount  NOTIFY countChanged  )
+    qint32 count() const;
+    void setCount(qint32 val);
+signals:
+    void countChanged();
 private:
-    void updateInit();
+    void setCountImp(qint32 val);
+private:
+    qint32 _count;
+
+
+    // ----[ null ] ----
+public:
+    Q_PROPERTY(bool null  READ null  WRITE setNull  NOTIFY nullChanged  )
+    bool null() const;
+    void setNull(bool val);
+signals:
+    void nullChanged();
+private:
+    void setNullImp(bool val);
+private:
+    bool _null;
+
+
+    // ----[ cpos ] ----
+public:
+    Q_PROPERTY(QPointF cpos  READ cpos  WRITE setCpos  NOTIFY cposChanged  )
+    QPointF cpos() const;
+    void setCpos(QPointF val);
+signals:
+    void cposChanged();
+private:
+    void setCposImp(QPointF val);
+private:
+    QPointF _cpos;
+
+
 public:
     friend QDataStream& operator<< (QDataStream& ds, const ClassProp * p);
     friend QDataStream& operator>> (QDataStream& ds, ClassProp * p);
@@ -198,6 +202,7 @@ public:
     static void save(QDataStream& ds);
     static void createIndex();
     static void clearIndex();
+    static void deleteAll();
     static QList<ClassProp*> _ptrs;
     static QHash<ClassProp*, quint32> _indexedPtrs;
 };

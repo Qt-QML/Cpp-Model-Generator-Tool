@@ -5,52 +5,53 @@
 
 class Links : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	Q_INVOKABLE Links(QObject *parent = 0);
-	~Links();
+    Q_INVOKABLE Links(QObject *parent = 0);
+    ~Links();
 
 
-// ----[ from ] ----
+    // ----[ from ] ----
 public:
-	Q_PROPERTY(ClassProp* from  READ from  WRITE setFrom  NOTIFY fromChanged  )
-	ClassProp* from() const;
-	void setFrom(ClassProp* val);
+    Q_PROPERTY(ClassProp* from  READ from  WRITE setFrom  NOTIFY fromChanged  )
+    ClassProp* from() const;
+    void setFrom(ClassProp* val);
 signals:
-	void fromChanged();
+    void fromChanged();
 private:
-	void setFromImp(ClassProp* val);
+    void setFromImp(ClassProp* val);
 private:
-	ClassProp* _from;
+    ClassProp* _from;
 private slots:
-	void fromDeletedSlot();
+    void fromDeletedSlot();
 
 
-// ----[ to ] ----
+    // ----[ to ] ----
 public:
-	Q_PROPERTY(ClassModel* to  READ to  WRITE setTo  NOTIFY toChanged  )
-	ClassModel* to() const;
-	void setTo(ClassModel* val);
+    Q_PROPERTY(ClassModel* to  READ to  WRITE setTo  NOTIFY toChanged  )
+    ClassModel* to() const;
+    void setTo(ClassModel* val);
 signals:
-	void toChanged();
+    void toChanged();
 private:
-	void setToImp(ClassModel* val);
+    void setToImp(ClassModel* val);
 private:
-	ClassModel* _to;
+    ClassModel* _to;
 private slots:
-	void toDeletedSlot();
+    void toDeletedSlot();
 
 
 public:
-	friend QDataStream& operator<< (QDataStream& ds, const Links * p);
-	friend QDataStream& operator>> (QDataStream& ds, Links * p);
+    friend QDataStream& operator<< (QDataStream& ds, const Links * p);
+    friend QDataStream& operator>> (QDataStream& ds, Links * p);
 
-	static void init(int count);
-	static void load(QDataStream& ds);
-	static void save(QDataStream& ds);
-	static void createIndex();
-	static void clearIndex();
-	static QList<Links*> _ptrs;
+    static void init(int count);
+    static void load(QDataStream& ds);
+    static void save(QDataStream& ds);
+    static void createIndex();
+    static void clearIndex();
+    static void deleteAll();
+    static QList<Links*> _ptrs;
     static QHash<Links*, quint32> _indexedPtrs;
 };
 QDataStream& operator<< (QDataStream& ds, const Links * p);

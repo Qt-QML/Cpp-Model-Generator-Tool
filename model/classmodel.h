@@ -5,75 +5,76 @@
 
 class ClassModel : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	Q_INVOKABLE ClassModel(QObject *parent = 0);
-	~ClassModel();
+    Q_INVOKABLE ClassModel(QObject *parent = 0);
+    ~ClassModel();
 
 
-// ----[ properties ] ----
+    // ----[ properties ] ----
 public:
-	Q_PROPERTY(ObjectList* properties  READ properties  WRITE setProperties  NOTIFY propertiesChanged  )
-	ObjectList* properties() const;
-	void setProperties(ObjectList* val);
+    Q_PROPERTY(ObjectList* properties  READ properties  WRITE setProperties  NOTIFY propertiesChanged  )
+    ObjectList* properties() const;
+    void setProperties(ObjectList* val);
 signals:
-	void propertiesChanged();
+    void propertiesChanged();
 private:
-	void setPropertiesImp(ObjectList* val);
+    void setPropertiesImp(ObjectList* val);
 private:
-	ObjectList* _properties;
+    ObjectList* _properties;
 
 
-// ----[ name ] ----
+    // ----[ name ] ----
 public:
-	Q_PROPERTY(QString name  READ name  WRITE setName  NOTIFY nameChanged  )
-	QString name() const;
-	void setName(QString val);
+    Q_PROPERTY(QString name  READ name  WRITE setName  NOTIFY nameChanged  )
+    QString name() const;
+    void setName(QString val);
 signals:
-	void nameChanged();
+    void nameChanged();
 private:
-	void setNameImp(QString val);
+    void setNameImp(QString val);
 private:
-	QString _name;
+    QString _name;
 
 
-// ----[ pos ] ----
+    // ----[ pos ] ----
 public:
-	Q_PROPERTY(QPointF pos  READ pos  WRITE setPos  NOTIFY posChanged  )
-	QPointF pos() const;
-	void setPos(QPointF val);
+    Q_PROPERTY(QPointF pos  READ pos  WRITE setPos  NOTIFY posChanged  )
+    QPointF pos() const;
+    void setPos(QPointF val);
 signals:
-	void posChanged();
+    void posChanged();
 private:
-	void setPosImp(QPointF val);
+    void setPosImp(QPointF val);
 private:
-	QPointF _pos;
+    QPointF _pos;
+
 
     // ----[ cpos ] ----
 public:
-    Q_PROPERTY(QPointF cpos  READ cpos  WRITE setCPos  NOTIFY cposChanged  )
+    Q_PROPERTY(QPointF cpos  READ cpos  WRITE setCpos  NOTIFY cposChanged  )
     QPointF cpos() const;
-    void setCPos(QPointF val);
+    void setCpos(QPointF val);
 signals:
     void cposChanged();
 private:
-    void setCPosImp(QPointF val);
+    void setCposImp(QPointF val);
 private:
     QPointF _cpos;
 
 
-
 public:
     friend QDataStream& operator<< (QDataStream& ds, const ClassModel * p);
-	friend QDataStream& operator>> (QDataStream& ds, ClassModel * p);
+    friend QDataStream& operator>> (QDataStream& ds, ClassModel * p);
 
-	static void init(int count);
-	static void load(QDataStream& ds);
-	static void save(QDataStream& ds);
-	static void createIndex();
-	static void clearIndex();
-	static QList<ClassModel*> _ptrs;
-	static QHash<ClassModel*, quint32> _indexedPtrs;
+    static void init(int count);
+    static void load(QDataStream& ds);
+    static void save(QDataStream& ds);
+    static void createIndex();
+    static void clearIndex();
+    static void deleteAll();
+    static QList<ClassModel*> _ptrs;
+    static QHash<ClassModel*, quint32> _indexedPtrs;
 };
 QDataStream& operator<< (QDataStream& ds, const ClassModel * p);
 QDataStream& operator>> (QDataStream& ds, ClassModel * p);

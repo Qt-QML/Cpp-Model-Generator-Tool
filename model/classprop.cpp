@@ -1,4 +1,6 @@
-#include "classprop.h"
+#include "classProp.h"
+#include <QQmlEngine>
+
 //// - [ static ] ----------------------------------------------------------------------------
 QList<ClassProp*> ClassProp::_ptrs;
 QHash<ClassProp *, quint32> ClassProp::_indexedPtrs;
@@ -6,9 +8,8 @@ QHash<ClassProp *, quint32> ClassProp::_indexedPtrs;
 void ClassProp::init(int count)
 {
     //clear current
-    while (!_ptrs.isEmpty())
-        _ptrs.takeFirst()->deleteLater();
-    _ptrs.clear();
+    deleteAll();
+
     for (int i=0;i<count;i++)
         new ClassProp;
 }
@@ -33,12 +34,20 @@ void ClassProp::createIndex() //must be called for all classes before save for t
     _indexedPtrs.insert(NULL, -1);
     quint32 index = 0;
     QListIterator<ClassProp *> i(_ptrs);
-    while (i.hasNext())		_indexedPtrs.insert(i.next(), index++);
+    while (i.hasNext())        _indexedPtrs.insert(i.next(), index++);
 }
 
 void ClassProp::clearIndex()
 {
     _indexedPtrs.clear();
+}
+
+void ClassProp::deleteAll()
+{
+    QList<ClassProp*> tmp = _ptrs;
+    _ptrs.clear();
+    for (int i=0;i<tmp.count();i++)
+        delete tmp[i];
 }
 
 //// - [ non-static ] ----------------------------------------------------------------------------
@@ -47,8 +56,8 @@ ClassProp::ClassProp(QObject *parent) :
     QObject(parent)
 {
     _name = "unnamed";
-
     _count = 0;
+
     _ptrs.append(this);
 }
 
@@ -163,25 +172,6 @@ void ClassProp::setUndoImp(bool val)
     emit undoChanged();
 }
 
-
-// ----[ null ] ----
-bool ClassProp::null() const
-{
-    return _null;
-}
-void ClassProp::setNull(bool val)
-{
-    if (val == _null)
-        return;
-
-
-    _null = val;
-    emit nullChanged();
-
-    updateInit();
-}
-
-
 // ----[ validate ] ----
 QString ClassProp::validate() const
 {
@@ -258,8 +248,6 @@ void ClassProp::setNameImp(QString val)
 {
     _name = val;
     emit nameChanged();
-
-    updateInit();
 }
 
 // ----[ type ] ----
@@ -271,7 +259,6 @@ void ClassProp::setType(QString val)
 {
     if (val == _type)
         return;
-
 
     if (Undoer::instance()->noundo() == false)
     {
@@ -287,11 +274,9 @@ void ClassProp::setTypeImp(QString val)
 {
     _type = val;
     emit typeChanged();
-
-    updateInit();
 }
 
-// ----[ subtype ] ----
+// ----[ subType ] ----
 QString ClassProp::subType() const
 {
     return _subType;
@@ -301,8 +286,6 @@ void ClassProp::setSubType(QString val)
     if (val == _subType)
         return;
 
-
-
     if (Undoer::instance()->noundo() == false)
     {
         setSubTypeImp(val);
@@ -310,34 +293,13 @@ void ClassProp::setSubType(QString val)
     }
 
     QUndoCommand *cmd = new PropertyChangeCmd(this, "subType",QVariant(_subType), QVariant(val));
-    cmd->setText("Set Type");
+    cmd->setText("Set SubType");
     Undoer::instance()->push(cmd);
 }
 void ClassProp::setSubTypeImp(QString val)
 {
     _subType = val;
     emit subTypeChanged();
-
-    updateInit();
-}
-
-// ----[ subtype ] ----
-QPointF ClassProp::cpos() const
-{
-    return _cpos;
-}
-void ClassProp::setCPos(QPointF val)
-{
-    if (val == _cpos)
-        return;
-
-    setCPosImp(val);
-
-}
-void ClassProp::setCPosImp(QPointF val)
-{
-    _cpos = val;
-    emit cposChanged();
 }
 
 // ----[ init ] ----
@@ -392,55 +354,77 @@ void ClassProp::setWriteImp(bool val)
     emit writeChanged();
 }
 
-
-int ClassProp::count() const
+// ----[ count ] ----
+qint32 ClassProp::count() const
 {
     return _count;
 }
-void ClassProp::setCount(int val)
+void ClassProp::setCount(qint32 val)
 {
-    if (_count == val)
+    if (val == _count)
         return;
 
-    _count = val;
+    if (Undoer::instance()->noundo() == false)
+    {
+        setCountImp(val);
+        return;
+    }
 
-    emit countChanged();
-
-    updateInit();
+    QUndoCommand *cmd = new PropertyChangeCmd(this, "count",QVariant(_count), QVariant(val));
+    cmd->setText("Set Count");
+    Undoer::instance()->push(cmd);
 }
-
-void ClassProp::updateInit()
+void ClassProp::setCountImp(qint32 val)
 {
-    if (_type == "QObject*")
-    {
-        if (_null)
-        {
-            setInit(QString("_") + _name + " = NULL");
-            setDestruct("");
-        }
-        else
-        {
-            QString Name = _name;
-            QChar *ptr = Name.data();
-            *ptr = ptr->toUpper();
-
-            QString init = \
-                    QString("_") + _name + " = NULL;\n"
-                    "    set%%Propname%%Imp(new " + _subType + "())";
-
-            init.replace("%%Propname%%", Name, Qt::CaseSensitive);
-
-            setInit(init);
-            setDestruct(QString("_") + _name+ "->deleteLater()");
-        }
-    }
-
-    if (_type == "ObjectList*")
-    {
-        setInit((QString("_") + _name + " = new ObjectList("+_subType+"::staticMetaObject, %1)").arg(_count));
-        setDestruct(QString("_") + _name+ "->deleteLater()");
-    }
+    _count = val;
+    emit countChanged();
 }
+
+// ----[ null ] ----
+bool ClassProp::null() const
+{
+    return _null;
+}
+void ClassProp::setNull(bool val)
+{
+    if (val == _null)
+        return;
+
+    if (Undoer::instance()->noundo() == false)
+    {
+        setNullImp(val);
+        return;
+    }
+
+    QUndoCommand *cmd = new PropertyChangeCmd(this, "null",QVariant(_null), QVariant(val));
+    cmd->setText("Set Null");
+    Undoer::instance()->push(cmd);
+}
+void ClassProp::setNullImp(bool val)
+{
+    _null = val;
+    emit nullChanged();
+}
+
+// ----[ cpos ] ----
+QPointF ClassProp::cpos() const
+{
+    return _cpos;
+}
+void ClassProp::setCpos(QPointF val)
+{
+    if (val == _cpos)
+        return;
+
+    _cpos = val;
+    emit cposChanged();
+}
+void ClassProp::setCposImp(QPointF val)
+{
+    _cpos = val;
+    emit cposChanged();
+}
+
 
 QDataStream& operator<< (QDataStream& ds, const ClassProp * p)
 {
@@ -476,6 +460,9 @@ QDataStream& operator<< (QDataStream& ds, const ClassProp * p)
 
     // ----[ type SAVE ] ----
     ds << p->_type;
+
+
+    // ----[ subType SAVE ] ----
     ds << p->_subType;
 
 
@@ -486,9 +473,14 @@ QDataStream& operator<< (QDataStream& ds, const ClassProp * p)
     // ----[ write SAVE ] ----
     ds << p->_write;
 
+
+    // ----[ count SAVE ] ----
     ds << p->_count;
 
-    ds << p->null();
+
+    // ----[ null SAVE ] ----
+    ds << p->_null;
+
 
     return ds;
 }
@@ -521,6 +513,8 @@ QDataStream& operator>> (QDataStream& ds, ClassProp * p)
 
     // ----[ type LOAD ] ----
     ds >> p->_type;
+
+    // ----[ subType LOAD ] ----
     ds >> p->_subType;
 
     // ----[ init LOAD ] ----
@@ -529,8 +523,10 @@ QDataStream& operator>> (QDataStream& ds, ClassProp * p)
     // ----[ write LOAD ] ----
     ds >> p->_write;
 
+    // ----[ count LOAD ] ----
     ds >> p->_count;
 
+    // ----[ null LOAD ] ----
     ds >> p->_null;
 
 

@@ -1,21 +1,27 @@
 #include "modelloader.h"
 #include "classes.h"
-#include <QUrl>
-#include <QSaveFile>
-#include <QFile>
-#include <QDebug>
-#include <QQmlComponent>
 
+#include <QDebug>
+#include <QtQml>
+#include <QQmlEngine>
+#include <QSaveFile>
+#include <QUrl>
 
 ModelLoader::ModelLoader(QObject *parent) :
     QObject(parent)
 {
+    // singleton
+    qmlRegisterType<Model>();
+
+    // object
     qmlRegisterType<ObjectList>();
+    qmlRegisterType<Undoer>();
+
+    // all other classes that make up the model
     qmlRegisterType<ClassModel>();
     qmlRegisterType<ClassProp>();
     qmlRegisterType<Links>();
-    qmlRegisterType<Undoer>();
-    qmlRegisterType<Model>();
+
 }
 
 Undoer * ModelLoader::undoer() const
@@ -46,7 +52,6 @@ QObject * ModelLoader::load(const QString & fileName)
         ds >> count; ClassProp::init(count);
         ds >> count; Links::init(count);
 
-       // qDebug() << "loadingodel: " << Model::_ptrs.count();
         qDebug() << "loading ClassModel: " << ClassModel::_ptrs.count();
         qDebug() << "loading ClassProp: " << ClassProp::_ptrs.count();
         qDebug() << "loading Links: " << Links::_ptrs.count();
@@ -56,6 +61,7 @@ QObject * ModelLoader::load(const QString & fileName)
         ClassModel::load(ds);
         ClassProp::load(ds);
         Links::load(ds);
+
     }
 
     return ret;
@@ -71,7 +77,6 @@ void ModelLoader::save(const QString & fileName, QObject * model) const
         QDataStream ds(&f);
 
         //create indices
-        //Model::createIndex();
         ClassModel::createIndex();
         ClassProp::createIndex();
         Links::createIndex();
@@ -80,7 +85,6 @@ void ModelLoader::save(const QString & fileName, QObject * model) const
         qDebug() << "saving ClassProp: " << ClassProp::_ptrs.count();
         qDebug() << "saving Links: " << Links::_ptrs.count();
 
-        // FIXME - tricky. Ask undoer, which lines it has removed in a list
         // save each class separately
         ds << (quint32)1;
         ds << (quint32)ClassModel::_ptrs.count();
@@ -99,6 +103,7 @@ void ModelLoader::save(const QString & fileName, QObject * model) const
         ClassModel::clearIndex();
         ClassProp::clearIndex();
         Links::clearIndex();
+
     }
 }
 

@@ -1,5 +1,5 @@
-#include "classmodel.h"
-#include <QDebug>
+#include "classModel.h"
+#include <QQmlEngine>
 
 //// - [ static ] ----------------------------------------------------------------------------
 QList<ClassModel*> ClassModel::_ptrs;
@@ -8,9 +8,8 @@ QHash<ClassModel *, quint32> ClassModel::_indexedPtrs;
 void ClassModel::init(int count)
 {
     //clear current
-    while (!_ptrs.isEmpty())
-        _ptrs.takeFirst()->deleteLater();
-    _ptrs.clear();
+    deleteAll();
+
     for (int i=0;i<count;i++)
         new ClassModel;
 }
@@ -35,7 +34,7 @@ void ClassModel::createIndex() //must be called for all classes before save for 
     _indexedPtrs.insert(NULL, -1);
     quint32 index = 0;
     QListIterator<ClassModel *> i(_ptrs);
-    while (i.hasNext())		_indexedPtrs.insert(i.next(), index++);
+    while (i.hasNext())        _indexedPtrs.insert(i.next(), index++);
 }
 
 void ClassModel::clearIndex()
@@ -43,12 +42,20 @@ void ClassModel::clearIndex()
     _indexedPtrs.clear();
 }
 
+void ClassModel::deleteAll()
+{
+    QList<ClassModel*> tmp = _ptrs;
+    _ptrs.clear();
+    for (int i=0;i<tmp.count();i++)
+        delete tmp[i];
+}
+
 //// - [ non-static ] ----------------------------------------------------------------------------
 
 ClassModel::ClassModel(QObject *parent) :
     QObject(parent)
 {
-    _properties = new ObjectList(ClassProp::staticMetaObject);
+    _properties = new ObjectList(ClassProp::staticMetaObject, 0);
     _name = "unnamed";
 
     _ptrs.append(this);
@@ -129,6 +136,7 @@ void ClassModel::setPos(QPointF val)
         setPosImp(val);
         return;
     }
+
     QUndoCommand *cmd = new PropertyChangeCmd(this, "pos",QVariant(_pos), QVariant(val));
     cmd->setText("Set Pos");
     Undoer::instance()->push(cmd);
@@ -136,24 +144,23 @@ void ClassModel::setPos(QPointF val)
 void ClassModel::setPosImp(QPointF val)
 {
     _pos = val;
-    qDebug() << _pos;
     emit posChanged();
 }
 
-// ----[ subtype ] ----
+// ----[ cpos ] ----
 QPointF ClassModel::cpos() const
 {
     return _cpos;
 }
-void ClassModel::setCPos(QPointF val)
+void ClassModel::setCpos(QPointF val)
 {
     if (val == _cpos)
         return;
 
-    setCPosImp(val);
-
+    _cpos = val;
+    emit cposChanged();
 }
-void ClassModel::setCPosImp(QPointF val)
+void ClassModel::setCposImp(QPointF val)
 {
     _cpos = val;
     emit cposChanged();
