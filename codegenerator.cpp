@@ -518,11 +518,9 @@ static QString generateClassModelCPP(const ClassModel *classModel, bool isRoot)
     QChar *ptr = ClassName.data();
     *ptr = ptr->toUpper();
 
-    QString className = classModel->name();
-    ptr = className.data();
-    *ptr = ptr->toLower();
+    QString classname = classModel->name().toLower();
 
-    cpp.replace("%%classname%%", className);
+    cpp.replace("%%classname%%", classname);
     cpp.replace("%%Classname%%", ClassName);
 
     return cpp;
