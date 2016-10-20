@@ -37,19 +37,6 @@ private:
     ObjectList* _classes;
 
 
-    // ----[ name ] ----
-public:
-    Q_PROPERTY(QString name  READ name  WRITE setName  NOTIFY nameChanged  )
-    QString name() const;
-    void setName(QString val);
-signals:
-    void nameChanged();
-private:
-    void setNameImp(QString val);
-private:
-    QString _name;
-
-
     // ----[ winRect ] ----
 public:
     Q_PROPERTY(QRectF winRect  READ winRect  WRITE setWinRect  NOTIFY winRectChanged  )
@@ -63,14 +50,24 @@ private:
     QRectF _winRect;
 
 
+    // ----[ name ] ----
+public:
+    Q_PROPERTY(QString name  READ name  WRITE setName  NOTIFY nameChanged  )
+    QString name() const;
+    void setName(QString val);
+signals:
+    void nameChanged();
+private:
+    void setNameImp(QString val);
+private:
+    QString _name;
+
+
 public:
     friend QDataStream& operator<< (QDataStream& ds, const Model * p);
     friend QDataStream& operator>> (QDataStream& ds, Model * p);
 
-
 };
 QDataStream& operator<< (QDataStream& ds, const Model * p);
 QDataStream& operator>> (QDataStream& ds, Model * p);
-
-
 #endif // MODEL_H

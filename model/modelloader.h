@@ -10,10 +10,10 @@ class ModelLoader : public QObject
 {
     Q_OBJECT
 public:
-    explicit ModelLoader(QObject *parent = 0);
-    
+    explicit ModelLoader(QObject *parent = Q_NULLPTR);
+
 signals:
-    
+
 public slots:
     QObject * create();
     QObject * load(const QString & fileName);

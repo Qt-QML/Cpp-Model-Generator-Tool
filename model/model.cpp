@@ -1,21 +1,18 @@
 #include "model.h"
-#include <QDebug>
-
-#include <QQmlComponent>
+#include <QQmlEngine>
 
 Model::Model(QObject *parent) :
     QObject(parent)
 {
-    _winRect = QRectF(100,100, 600, 400);;
-
-    _classes = new ObjectList(ClassModel::staticMetaObject);
-    _links = new ObjectList(Links::staticMetaObject);
+    _links = new ObjectList(Links::staticMetaObject, 0);
+    _classes = new ObjectList(ClassModel::staticMetaObject, 0);;
+    _winRect = QRectF(100,100, 600, 400);
 }
 
 Model::~Model()
 {
-    _classes->deleteLater();
     _links->deleteLater();
+    _classes->deleteLater();;
 }
 
 
@@ -71,35 +68,6 @@ void Model::setClassesImp(ObjectList* val)
     emit classesChanged();
 }
 
-
-// ----[ name ] ----
-QString Model::name() const
-{
-    return _name;
-}
-void Model::setName(QString val)
-{
-    if (val == _name)
-        return;
-
-    if (Undoer::instance()->noundo() == false)
-    {
-        setNameImp(val);
-        return;
-    }
-
-    QUndoCommand *cmd = new PropertyChangeCmd(this, "name",QVariant(_name), QVariant(val));
-    cmd->setText("Set RootClassName");
-    Undoer::instance()->push(cmd);
-}
-void Model::setNameImp(QString val)
-{
-    qDebug() << val;
-    _name = val;
-    emit nameChanged();
-}
-
-
 // ----[ winRect ] ----
 QRectF Model::winRect() const
 {
@@ -126,9 +94,37 @@ void Model::setWinRectImp(QRectF val)
     emit winRectChanged();
 }
 
+// ----[ name ] ----
+QString Model::name() const
+{
+    return _name;
+}
+void Model::setName(QString val)
+{
+    if (val == _name)
+        return;
+
+    if (Undoer::instance()->noundo() == false)
+    {
+        setNameImp(val);
+        return;
+    }
+
+    QUndoCommand *cmd = new PropertyChangeCmd(this, "name",QVariant(_name), QVariant(val));
+    cmd->setText("Set Name");
+    Undoer::instance()->push(cmd);
+}
+void Model::setNameImp(QString val)
+{
+    _name = val;
+    emit nameChanged();
+}
+
 
 QDataStream& operator<< (QDataStream& ds, const Model * p)
 {
+
+
     // ----[ links SAVE ] ----
     ds << ((qint32)(p->_links->count()));
     for (int i=0; i<p->_links->count(); i++)
@@ -136,6 +132,7 @@ QDataStream& operator<< (QDataStream& ds, const Model * p)
         Links *o = p->_links->get<Links*>(i);
         ds << Links::_indexedPtrs.value(o);
     }
+
 
     // ----[ classes SAVE ] ----
     ds << ((qint32)(p->_classes->count()));
@@ -148,6 +145,9 @@ QDataStream& operator<< (QDataStream& ds, const Model * p)
 
     // ----[ winRect SAVE ] ----
     ds << p->_winRect;
+
+
+    // ----[ name SAVE ] ----
     ds << p->_name;
 
 
@@ -181,7 +181,10 @@ QDataStream& operator>> (QDataStream& ds, Model * p)
 
     // ----[ winRect LOAD ] ----
     ds >> p->_winRect;
+
+    // ----[ name LOAD ] ----
     ds >> p->_name;
+
 
     return ds;
 }
