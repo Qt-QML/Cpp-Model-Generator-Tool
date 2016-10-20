@@ -1,39 +1,38 @@
-#include "%%classname%%root.h"
+#include "%%classname%%loader.h"
+#include "classes.h"
+
 #include <QDebug>
 #include <QtQml>
 #include <QQmlEngine>
+#include <QSaveFile>
+#include <QUrl>
 
-#include "classes.h"
-
-%%Classname%%Root::%%Classname%%Root(QObject *parent) :
+%%Classname%%Loader::%%Classname%%Loader(QObject *parent) :
     QObject(parent)
 {
-     QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
-
     // singleton
     qmlRegisterType<%%Classname%%>();
 
     // object
     qmlRegisterType<ObjectList>();
+    qmlRegisterType<Undoer>();
 
     // all other classes that make up the model
-    %%register_types%%
+%%register_types%%
 }
 
-Undoer * %%Classname%%Root::undoer() const
+Undoer * %%Classname%%Loader::undoer() const
 {
     return Undoer::instance();
 }
 
-QObject * %%Classname%%Root::create()
+QObject * %%Classname%%Loader::create()
 {
     return new %%Classname%%;
 }
 
-QObject * %%Classname%%Root::load(const QString & fileName)
+QObject * %%Classname%%Loader::load(const QString & fileName)
 {
-    %%clear_older%%
-
     %%Classname%% *ret = new %%Classname%%;
 
     QUrl url(fileName);
@@ -45,20 +44,18 @@ QObject * %%Classname%%Root::load(const QString & fileName)
         QDataStream ds(&f);
 
         // all objects must be created before setting values and linking pointers
-        %%load_init%%
-
-        %%load_dbg_count%%
-
+        ds >> count;
+%%load_init%%
+%%load_dbg_count%%
         // load
         ds >> ret;
-        %%load%%
+%%load%%
     }
 
     return ret;
 }
 
-
-void %%Classname%%Root::save(const QString & fileName,  QObject * model) const
+void %%Classname%%Loader::save(const QString & fileName, QObject * model) const
 {
     QUrl url(fileName);
 
@@ -68,25 +65,19 @@ void %%Classname%%Root::save(const QString & fileName,  QObject * model) const
         QDataStream ds(&f);
 
         //create indices
-        %%save_index%%
-
-        %%save_dbg_count%%
-
+%%save_index%%
+%%save_dbg_count%%
         // save each class separately
-        %%save_init%%
-
+        ds << (quint32)1;
+%%save_init%%
         ds << (%%Classname%%*)model;
-        %%save%%
-
-
+%%save%%
         f.commit();
 
         // free up memory
         //Model::clearIndex();
-        %%save_clear%%
+%%save_clear%%
     }
 }
-
-
 
 

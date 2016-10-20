@@ -130,9 +130,9 @@ static QString generateClassPropCPP(const ClassProp *classProp, const QString &c
     if (classProp->type() == "QObject*")
     {
         cpp += "    if (_%%propname%% != NULL)\n"
-                "        disconnect(reinterpret_cast<QObject*>(_%%propname%%), SIGNAL(destroyed()), this, SLOT(%%propname%%DeletedSlot()));\n";
+                "        disconnect(_%%propname%%, SIGNAL(destroyed()), this, SLOT(%%propname%%DeletedSlot()));\n";
         cpp += "    if (val != NULL)\n"
-                "        connect(reinterpret_cast<QObject*>(val), SIGNAL(destroyed()), this, SLOT(%%propname%%DeletedSlot()));\n\n";
+                "        connect(val, SIGNAL(destroyed()), this, SLOT(%%propname%%DeletedSlot()));\n\n";
     }
     cpp += "    _%%propname%% = val;\n";
     if (classProp->notify())
@@ -266,7 +266,7 @@ static QString generateClassPropLoad(const ClassProp *classProp)
 }
 
 
-static QString generateClassModelH(const ClassModel *classModel)
+static QString generateClassModelH(const ClassModel *classModel, bool isRoot)
 {
     QString cpp;
 
@@ -288,20 +288,23 @@ static QString generateClassModelH(const ClassModel *classModel)
 
     cpp += "\n\npublic:\n"
             "    friend QDataStream& operator<< (QDataStream& ds, const %%Classname%% * p);\n"
-            "    friend QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n\n"
-            "    static void init(int count);\n"
-            "    static void load(QDataStream& ds);\n"
-            "    static void save(QDataStream& ds);\n"
-            "    static void createIndex();\n"
-            "    static void clearIndex();\n"
-            "    static void deleteAll();\n"
-            "    static QList<%%Classname%%*> _ptrs;\n"
-            "    static QHash<%%Classname%%*, quint32> _indexedPtrs;\n"
-            "};\n"
-            "QDataStream& operator<< (QDataStream& ds, const %%Classname%% * p);\n"
-            "QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n"
-            "#endif // %%CLASSNAME%%_H\n";
+            "    friend QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n\n";
 
+    if (!isRoot) {
+        cpp += "    static void init(int count);\n"
+               "    static void load(QDataStream& ds);\n"
+               "    static void save(QDataStream& ds);\n"
+               "    static void createIndex();\n"
+               "    static void clearIndex();\n"
+               "    static void deleteAll();\n"
+               "    static QList<%%Classname%%*> _ptrs;\n"
+               "    static QHash<%%Classname%%*, quint32> _indexedPtrs;\n";
+    }
+
+    cpp += "};\n"
+           "QDataStream& operator<< (QDataStream& ds, const %%Classname%% * p);\n"
+           "QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n"
+           "#endif // %%CLASSNAME%%_H\n";
 
     QString ClassName = classModel->name();
     QChar *ptr = ClassName.data();
@@ -321,62 +324,64 @@ static QString generateClassModelH(const ClassModel *classModel)
     return cpp;
 }
 
-static QString generateClassModelCPP(const ClassModel *classModel)
+static QString generateClassModelCPP(const ClassModel *classModel, bool isRoot)
 {
     QString cpp;
 
     cpp += "#include \"%%classname%%.h\"\n"
             "#include <QQmlEngine>\n\n";
 
-    cpp += "//// - [ static ] ----------------------------------------------------------------------------\n"
-            "QList<%%Classname%%*> %%Classname%%::_ptrs;\n"
-            "QHash<%%Classname%% *, quint32> %%Classname%%::_indexedPtrs;\n\n"
-            "void %%Classname%%::init(int count)\n"
-            "{\n"
-            "    //clear current\n"
-            "    deleteAll();\n"
-            "\n"
-            "    for (int i=0;i<count;i++)\n"
-            "        new %%Classname%%;\n"
-            "}\n\n"
-            "void %%Classname%%::load(QDataStream& ds)\n"
-            "{\n"
-            "    quint32 count = _ptrs.count();\n"
-            "    for (quint32 i=0;i<count; i++)\n"
-            "        ds >> _ptrs[i];\n"
-            "}\n\n"
-            "void %%Classname%%::save(QDataStream& ds)\n"
-            "{\n"
-            "    QListIterator<%%Classname%% *> i(_ptrs);\n"
-            "    while (i.hasNext())\n"
-            "        ds << i.next();\n"
-            "}\n\n"
-            "void %%Classname%%::createIndex() //must be called for all classes before save for this class\n"
-            "{\n"
-            "    _indexedPtrs.clear();\n"
-            "    _indexedPtrs.insert(NULL, -1);\n"
-            "    quint32 index = 0;\n"
-            "    QListIterator<%%Classname%% *> i(_ptrs);\n"
-            "    while (i.hasNext())"
-            "        _indexedPtrs.insert(i.next(), index++);\n"
-            "}\n\n"
-            "void %%Classname%%::clearIndex()\n"
-            "{\n"
-            "    _indexedPtrs.clear();\n"
-            "}\n\n"
-            "void %%Classname%%::deleteAll()\n"
-            "{\n"
-            "    QList<%%Classname%%*> tmp = _ptrs;\n"
-            "    _ptrs.clear();\n"
-            "    for (int i=0;i<tmp.count();i++)\n"
-            "        delete tmp[i];\n"
-            "}\n\n"
-            "//// - [ non-static ] ----------------------------------------------------------------------------\n\n";
+    if (!isRoot) {
+        cpp += "//// - [ static ] ----------------------------------------------------------------------------\n"
+               "QList<%%Classname%%*> %%Classname%%::_ptrs;\n"
+               "QHash<%%Classname%% *, quint32> %%Classname%%::_indexedPtrs;\n\n"
+               "void %%Classname%%::init(int count)\n"
+               "{\n"
+               "    //clear current\n"
+               "    deleteAll();\n"
+               "\n"
+               "    for (int i=0;i<count;i++)\n"
+               "        new %%Classname%%;\n"
+               "}\n\n"
+               "void %%Classname%%::load(QDataStream& ds)\n"
+               "{\n"
+               "    quint32 count = _ptrs.count();\n"
+               "    for (quint32 i=0;i<count; i++)\n"
+               "        ds >> _ptrs[i];\n"
+               "}\n\n"
+               "void %%Classname%%::save(QDataStream& ds)\n"
+               "{\n"
+               "    QListIterator<%%Classname%% *> i(_ptrs);\n"
+               "    while (i.hasNext())\n"
+               "        ds << i.next();\n"
+               "}\n\n"
+               "void %%Classname%%::createIndex() //must be called for all classes before save for this class\n"
+               "{\n"
+               "    _indexedPtrs.clear();\n"
+               "    _indexedPtrs.insert(NULL, -1);\n"
+               "    quint32 index = 0;\n"
+               "    QListIterator<%%Classname%% *> i(_ptrs);\n"
+               "    while (i.hasNext())"
+               "        _indexedPtrs.insert(i.next(), index++);\n"
+               "}\n\n"
+               "void %%Classname%%::clearIndex()\n"
+               "{\n"
+               "    _indexedPtrs.clear();\n"
+               "}\n\n"
+               "void %%Classname%%::deleteAll()\n"
+               "{\n"
+               "    QList<%%Classname%%*> tmp = _ptrs;\n"
+               "    _ptrs.clear();\n"
+               "    for (int i=0;i<tmp.count();i++)\n"
+               "        delete tmp[i];\n"
+               "}\n\n"
+               "//// - [ non-static ] ----------------------------------------------------------------------------\n\n";
+    }
 
-    cpp +=  "%%Classname%%::%%Classname%%(QObject *parent) :\n"
-            "    QObject(parent)\n"
-            "{\n"
-            "    QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);\n";
+    cpp += "%%Classname%%::%%Classname%%(QObject *parent) :\n"
+           "    QObject(parent)\n"
+           "{\n";
+
     for (int i=0;i<classModel->properties()->count(); i++)
     {
         ClassProp *p =  classModel->properties()->get<ClassProp*>(i);
@@ -384,7 +389,9 @@ static QString generateClassModelCPP(const ClassModel *classModel)
         if (p->init().length() > 0)
             cpp += QString("    ") + p->init() + ";\n";
     }
-    cpp += "\n    _ptrs.append(this);\n";
+
+    if (!isRoot)
+        cpp += "\n    _ptrs.append(this);\n";
 
     cpp += "}\n\n";
 
@@ -397,7 +404,9 @@ static QString generateClassModelCPP(const ClassModel *classModel)
         if (p->destruct().length() > 0)
             cpp += QString("    ") + p->destruct() + ";\n";
     }
-    cpp += "\n    _ptrs.removeOne(this);\n";
+
+    if (!isRoot)
+        cpp += "\n    _ptrs.removeOne(this);\n";
     cpp += "}\n\n";
 
     for (int i=0;i<classModel->properties()->count(); i++)
@@ -472,17 +481,18 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
         for (int i=0; i<classes->count(); i++)
         {
             ClassModel *classModel = classes->get<ClassModel*>(i);
+            bool isRoot = model->name() == classModel->name();
 
             QSaveFile cpp(url.toLocalFile() + "/" + classModel->name().toLower() + ".cpp");
             cpp.open(QIODevice::WriteOnly | QIODevice::Truncate);
             QTextStream cppDS(&cpp);
-            cppDS << generateClassModelCPP(classModel).toLatin1().data();
+            cppDS << generateClassModelCPP(classModel, isRoot).toLatin1().data();
             cpp.commit();
 
             QSaveFile h(url.toLocalFile() + "/" +  classModel->name().toLower() + ".h");
             h.open(QIODevice::WriteOnly | QIODevice::Truncate);
             QTextStream cppH(&h);
-            cppH << generateClassModelH(classModel).toLatin1().data();
+            cppH << generateClassModelH(classModel, isRoot).toLatin1().data();
             h.commit();
         }
 
@@ -503,10 +513,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
                     "#include <QList>\n"
                     "#include <QHash>\n"
                     "#include <QSet>\n"
-                    "#include <QRectF>\n\n"
-                    "class Undoer;\n"
-                    "class "+model->name()+"Root;\n"
-                    "class ObjectList;\n\n";
+                    "#include <QRectF>\n\n";
 
             QSet<QString> list;// first classes by this program, later classes that are external
             for (int i=0; i<classes->count(); i++)
@@ -527,10 +534,8 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             while (i.hasNext())
                 h += QString("class ") + i.next() + ";\n";
 
-
-            h += "\n#include \"../model_engine/objectlist.h\"\n"
-                    "#include \"" + model->name().toLower() + "root.h\"\n"
-                    "#include \"../model_engine/undoer.h\"\n\n";
+            h += "#include \"../model_engine/objectlist.h\"\n"
+                 "#include \"../model_engine/undoer.h\"\n\n";
 
             for (int i=0; i<classes->count(); i++)
             {
@@ -538,7 +543,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
                 h += QString("#include \"") + classModel->name().toLower() + ".h\"\n";
             }
 
-            h += "\n#endif // CLASSES_H";
+            h += "\n#endif // CLASSES"+model->name().toUpper()+"_H\n";
             QSaveFile hfile(url.toLocalFile() + "/classes.h");
             hfile.open(QIODevice::WriteOnly | QIODevice::Truncate);
             QTextStream hDS(&hfile);
@@ -547,7 +552,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
         }
 
         {
-            // now save root.cpp
+            // now save [root]loader.cpp
             QFile tpl(":/resources/root.cpp");
             tpl.open(QIODevice::ReadOnly);
             QString cpp = tpl.readAll();
@@ -568,35 +573,28 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             //%%register_types%%
             tmp = "";
             for (int i = 0; i < names.size(); ++i)
-                tmp += QString("qmlRegisterType<%1>();\n").arg(names.at(i));
+                tmp += QString("    qmlRegisterType<%1>();\n").arg(names.at(i));
             cpp.replace("%%register_types%%", tmp, Qt::CaseSensitive);
 
             //ds >> count; Model::init(count);
             //%%load_init%%
             tmp = "";
             for (int i = 0; i < names.size(); ++i)
-                tmp += QString("ds >> count; %1::init(count);\n").arg(names.at(i));
+                tmp += QString("        ds >> count; %1::init(count);\n").arg(names.at(i));
             cpp.replace("%%load_init%%", tmp, Qt::CaseSensitive);
-
-            //%%clear_older%%
-            tmp = "";
-            for (int i = 0; i < names.size(); ++i)
-                tmp += QString("%1::deleteAll();\n").arg(names.at(i));
-            cpp.replace("%%clear_older%%", tmp, Qt::CaseSensitive);
-
 
             //qDebug() << "loadingodel: " << Model::_ptrs.count();
             //%%load_dbg_count%%
             tmp = "";
             for (int i = 0; i < names.size(); ++i)
-                tmp += QString("qDebug() << \"loading %1: \" << %2::_ptrs.count();\n").arg(names.at(i)).arg(names.at(i));
+                tmp += QString("        qDebug() << \"loading %1: \" << %2::_ptrs.count();\n").arg(names.at(i)).arg(names.at(i));
             cpp.replace("%%load_dbg_count%%", tmp, Qt::CaseSensitive);
 
             // ClassModel::load(ds);
             //%%load%%
             tmp = "";
             for (int i = 0; i < names.size(); ++i)
-                tmp += QString("%1::load(ds);\n").arg(names.at(i));
+                tmp += QString("        %1::load(ds);\n").arg(names.at(i));
             cpp.replace("%%load%%", tmp, Qt::CaseSensitive);
 
 
@@ -604,7 +602,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             //%%save_index%%
             tmp = "";
             for (int i = 0; i < names.size(); ++i)
-                tmp += QString("%1::createIndex();\n").arg(names.at(i));
+                tmp += QString("        %1::createIndex();\n").arg(names.at(i));
             cpp.replace("%%save_index%%", tmp, Qt::CaseSensitive);
 
 
@@ -612,7 +610,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             //%%save_dbg_count%%
             tmp = "";
             for (int i = 0; i < names.size(); ++i)
-                tmp += QString("qDebug() << \"saving %1: \" << %2::_ptrs.count();\n").arg(names.at(i)).arg(names.at(i));
+                tmp += QString("        qDebug() << \"saving %1: \" << %2::_ptrs.count();\n").arg(names.at(i)).arg(names.at(i));
             cpp.replace("%%save_dbg_count%%", tmp, Qt::CaseSensitive);
 
 
@@ -620,7 +618,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             //%%save_init%%
             tmp = "";
             for (int i = 0; i < names.size(); ++i)
-                tmp += QString("ds << (quint32)%1::_ptrs.count();\n").arg(names.at(i));
+                tmp += QString("        ds << (quint32)%1::_ptrs.count();\n").arg(names.at(i));
             cpp.replace("%%save_init%%", tmp, Qt::CaseSensitive);
 
 
@@ -628,7 +626,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             //%%save%%
             tmp = "";
             for (int i = 0; i < names.size(); ++i)
-                tmp += QString("%1::save(ds);\n").arg(names.at(i));
+                tmp += QString("        %1::save(ds);\n").arg(names.at(i));
             cpp.replace("%%save%%", tmp, Qt::CaseSensitive);
 
 
@@ -636,7 +634,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             //%%save_clear%%
             tmp = "";
             for (int i = 0; i < names.size(); ++i)
-                tmp += QString("%1::clearIndex();\n").arg(names.at(i));
+                tmp += QString("        %1::clearIndex();\n").arg(names.at(i));
             cpp.replace("%%save_clear%%", tmp, Qt::CaseSensitive);
 
 
@@ -644,7 +642,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             cpp.replace("%%Classname%%", model->name(), Qt::CaseSensitive);
 
 
-            QSaveFile cppfile(url.toLocalFile() + "/" + model->name().toLower() + "root.cpp");
+            QSaveFile cppfile(url.toLocalFile() + "/" + model->name().toLower() + "loader.cpp");
             cppfile.open(QIODevice::WriteOnly | QIODevice::Truncate);
             QTextStream cppTS(&cppfile);
             cppTS << cpp;
@@ -654,7 +652,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
 
 
         {
-            // now save root.cpp
+            // now save [root]loader.h
             QFile tpl(":/resources/root.h");
             tpl.open(QIODevice::ReadOnly);
             QString cpp = tpl.readAll();
@@ -663,7 +661,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             cpp.replace("%%Classname%%", model->name(), Qt::CaseSensitive);
             cpp.replace("%%CLASSNAME%%", model->name().toUpper(), Qt::CaseSensitive);
 
-            QSaveFile cppfile(url.toLocalFile() + "/" + model->name().toLower() + "root.h");
+            QSaveFile cppfile(url.toLocalFile() + "/" + model->name().toLower() + "loader.h");
             cppfile.open(QIODevice::WriteOnly | QIODevice::Truncate);
             QTextStream cppTS(&cppfile);
             cppTS << cpp;
