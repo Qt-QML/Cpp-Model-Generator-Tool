@@ -125,26 +125,34 @@ ApplicationWindow {
         id: openDialog
         title: "Open Project File..."
 
-        selectMultiple: false
-        selectFolder: false
-        selectExisting: true
+        nameFilters: [ "Coder projects (*.cod; *.json)" ]
 
-        nameFilters: [ "Coder project (*.cod)" ]
-
-        onAccepted: modelRoot = modelLoader.load(fileUrl);
+        onAccepted: {
+            var urlString = fileUrl.toString();
+            if (urlString.substring(urlString.lastIndexOf(".") + 1) === "cod")
+                modelRoot = modelLoader.load(fileUrl);
+            else
+                modelRoot = modelLoader.loadFromJson(fileUrl);
+        }
     }
 
     FileDialog {
         id: saveDialog
         title: "Save Project File..."
 
-        selectMultiple: false
-        selectFolder: false
         selectExisting: false
 
-       nameFilters: [ "Coder project (*.cod)" ]
+        nameFilters: [
+            "Coder project (*.cod)",
+            "JSON file (*.json)"
+        ]
 
-        onAccepted: modelLoader.save(fileUrl, modelRoot)
+        onAccepted: {
+            if (selectedNameFilter === "Coder project (*.cod)")
+                modelLoader.save(fileUrl, modelRoot)
+            else
+                modelLoader.saveAsJson(fileUrl, modelRoot)
+        }
     }
 
     Item {
