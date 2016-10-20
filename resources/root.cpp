@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QtQml>
 #include <QQmlEngine>
+#include <QJsonDocument>
 #include <QSaveFile>
 #include <QUrl>
 
@@ -33,51 +34,105 @@ QObject * %%Classname%%Loader::create()
 
 QObject * %%Classname%%Loader::load(const QString & fileName)
 {
-    %%Classname%% *ret = new %%Classname%%;
-
     QUrl url(fileName);
     QFile f(url.toLocalFile());
 
-    if (f.open(QIODevice::ReadOnly))
-    {
-        quint32 count;
-        QDataStream ds(&f);
+    if (!f.open(QIODevice::ReadOnly))
+        return nullptr;
 
-        // all objects must be created before setting values and linking pointers
-        ds >> count;
+    %%Classname%% *ret = new %%Classname%%;
+
+    quint32 count;
+    QDataStream ds(&f);
+
+    // all objects must be created before setting values and linking pointers
+    ds >> count;
 %%load_init%%
 %%load_dbg_count%%
-        // load
-        ds >> ret;
+    // load
+    ds >> ret;
 %%load%%
-    }
-
     return ret;
 }
 
-void %%Classname%%Loader::save(const QString & fileName, QObject * model) const
+bool %%Classname%%Loader::save(const QString & fileName, QObject *model) const
 {
     QUrl url(fileName);
 
     QSaveFile f(url.toLocalFile());
-    if (f.open(QIODevice::WriteOnly))
-    {
-        QDataStream ds(&f);
+    if (!f.open(QIODevice::WriteOnly))
+        return false;
 
-        //create indices
-%%save_index%%
-%%save_dbg_count%%
-        // save each class separately
-        ds << (quint32)1;
+    createIndices();
+
+    QDataStream ds(&f);
+
+    // save each class separately
+    ds << (quint32)1;
 %%save_init%%
-        ds << (%%Classname%%*)model;
+    ds << static_cast<%%Classname%%*>(model);
 %%save%%
-        f.commit();
+    clearIndices();
 
-        // free up memory
-        //Model::clearIndex();
-%%save_clear%%
-    }
+    return f.commit();
 }
 
+QObject * %%Classname%%Loader::loadFromJson(const QString &fileName)
+{
+    QUrl url(fileName);
+    QFile f(url.toLocalFile());
 
+    if (!f.open(QIODevice::ReadOnly))
+        return nullptr;
+
+    const QByteArray json = f.readAll();
+    QJsonParseError error;
+    const QJsonObject rootObject = QJsonDocument::fromJson(json, &error).object();
+    if (error.error != QJsonParseError::NoError)
+        return nullptr;
+
+    %%Classname%% *ret = new %%Classname%%;
+
+    // all objects must be created before setting values and linking pointers
+%%load_init_json%%
+%%load_dbg_count%%
+    // load
+    fromJson(rootObject[QLatin1String("%%classname%%")], ret);
+%%load_json%%
+    return ret;
+}
+
+bool %%Classname%%Loader::saveAsJson(const QString &fileName, QObject *model) const
+{
+    QUrl url(fileName);
+
+    QSaveFile f(url.toLocalFile());
+    if (!f.open(QIODevice::WriteOnly))
+        return false;
+
+    createIndices();
+
+    QJsonObject rootObject;
+
+    // save each class separately
+    rootObject.insert(QLatin1String("%%classname%%"), toJson(static_cast<%%Classname%%*>(model)));
+%%save_json%%
+    clearIndices();
+
+    f.write(QJsonDocument(rootObject).toJson());
+
+    return f.commit();
+}
+
+void %%Classname%%Loader::createIndices() const
+{
+    //create indices
+%%save_index%%
+%%save_dbg_count%%
+}
+
+void %%Classname%%Loader::clearIndices() const
+{
+    // free up memory
+%%save_clear%%
+}
