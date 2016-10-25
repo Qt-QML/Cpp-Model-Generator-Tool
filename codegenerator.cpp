@@ -157,9 +157,12 @@ static QString generateClassPropCPP(const ClassProp *classProp, const QString &c
     if (classProp->type() == "QObject*")
     {
         cpp += "void %%Classname%%::%%propname%%DeletedSlot()\n"
-                "{\n"
-                "    set%%Propname%%(Q_NULLPTR);\n"
-                "}\n";
+               "{\n";
+        if (classProp->write())
+            cpp += "    set%%Propname%%(Q_NULLPTR);\n";
+        else
+            cpp += "    set%%Propname%%Imp(Q_NULLPTR);\n";
+        cpp += "}\n";
     }
 
     ////////////////////////////////////////////////////////////////////////
