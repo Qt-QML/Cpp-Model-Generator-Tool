@@ -586,11 +586,11 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
                 "#include <QRectF>\n"
                 "\n";
 
-            QSet<QString> list;// first classes by this program, later classes that are external
+            QSet<QString> set;// first classes by this program, later classes that are external
             for (int i=0; i<classes->count(); i++)
             {
                 ClassModel *classModel = classes->get<ClassModel*>(i);
-                list.insert(classModel->name());
+                set.insert(classModel->name());
 
                 for (int j=0; j<classModel->properties()->count(); j++)
                 {
@@ -598,12 +598,15 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
 
                     if (prop->type() == "QObject*")
                         if (prop->subType().length()>0)
-                            list.insert(prop->subType());
+                            set.insert(prop->subType());
                 }
             }
-            QSetIterator<QString> i(list);
-            while (i.hasNext())
-                h += QString("class ") + i.next() + ";\n";
+
+            QList<QString> list = set.toList();
+            std::sort(list.begin(), list.end());
+
+            for (const QString &name : list)
+                h += QString("class ") + name + ";\n";
 
             h += "\n#include \"../model_engine/jsonconverters.h\"\n"
                  "#include \"../model_engine/objectlist.h\"\n"

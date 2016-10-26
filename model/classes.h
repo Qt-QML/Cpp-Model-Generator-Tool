@@ -12,9 +12,9 @@
 #include <QSet>
 #include <QRectF>
 
+class ClassModel;
 class ClassProp;
 class Links;
-class ClassModel;
 class Model;
 
 #include "../model_engine/jsonconverters.h"
