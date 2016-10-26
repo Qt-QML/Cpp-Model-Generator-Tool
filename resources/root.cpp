@@ -19,14 +19,14 @@ static QObject *%%classname%%LoaderProvider(QQmlEngine *engine, QJSEngine *scrip
 void %%Classname%%Loader::registerTypes()
 {
     // singleton
-    qmlRegisterType<%%Classname%%>();
     qmlRegisterSingletonType<%%Classname%%Loader>("%%Classname%%", 1, 0, "%%Classname%%Loader", %%classname%%LoaderProvider);
 
     // object
-    qmlRegisterType<ObjectList>();
-    qmlRegisterType<Undoer>();
+    qmlRegisterUncreatableType<ObjectList>("%%Classname%%", 1, 0, "ObjectList", "ObjectList is created natively");
+    qmlRegisterUncreatableType<Undoer>("%%Classname%%", 1, 0, "Undoer", "Undoer is created natively");
 
     // all other classes that make up the model
+    qmlRegisterUncreatableType<%%Classname%%>("%%Classname%%", 1, 0, "%%Classname%%", "%%Classname%% is created natively");
 %%register_types%%
 }
 
@@ -40,12 +40,12 @@ Undoer *%%Classname%%Loader::undoer() const
     return Undoer::instance();
 }
 
-QObject * %%Classname%%Loader::create()
+%%Classname%% *%%Classname%%Loader::create()
 {
     return new %%Classname%%;
 }
 
-QObject * %%Classname%%Loader::load(const QString & fileName)
+%%Classname%% *%%Classname%%Loader::load(const QString &fileName)
 {
     QUrl url(fileName);
     QFile f(url.toLocalFile());
@@ -68,7 +68,7 @@ QObject * %%Classname%%Loader::load(const QString & fileName)
     return ret;
 }
 
-bool %%Classname%%Loader::save(const QString & fileName, QObject *model) const
+bool %%Classname%%Loader::save(const QString &fileName, QObject *model) const
 {
     QUrl url(fileName);
 
@@ -90,7 +90,7 @@ bool %%Classname%%Loader::save(const QString & fileName, QObject *model) const
     return f.commit();
 }
 
-QObject * %%Classname%%Loader::loadFromJson(const QString &fileName)
+%%Classname%% *%%Classname%%Loader::loadFromJson(const QString &fileName)
 {
     QUrl url(fileName);
     QFile f(url.toLocalFile());

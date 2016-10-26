@@ -16,11 +16,11 @@ public:
     static void registerTypes();
 
 public slots:
-    QObject * create();
-    QObject * load(const QString & fileName);
-    bool save(const QString & fileName, QObject *model) const;
+    Model *create();
+    Model *load(const QString &fileName);
+    bool save(const QString &fileName, QObject *model) const;
 
-    QObject * loadFromJson(const QString &fileName);
+    Model *loadFromJson(const QString &fileName);
     bool saveAsJson(const QString &fileName, QObject *model) const;
 
     Undoer *undoer() const;

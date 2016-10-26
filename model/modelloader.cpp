@@ -19,17 +19,17 @@ static QObject *modelLoaderProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
 void ModelLoader::registerTypes()
 {
     // singleton
-    qmlRegisterType<Model>();
     qmlRegisterSingletonType<ModelLoader>("Model", 1, 0, "ModelLoader", modelLoaderProvider);
 
     // object
-    qmlRegisterType<ObjectList>();
-    qmlRegisterType<Undoer>();
+    qmlRegisterUncreatableType<ObjectList>("Model", 1, 0, "ObjectList", "ObjectList is created natively");
+    qmlRegisterUncreatableType<Undoer>("Model", 1, 0, "Undoer", "Undoer is created natively");
 
     // all other classes that make up the model
-    qmlRegisterType<ClassModel>();
-    qmlRegisterType<ClassProp>();
-    qmlRegisterType<Links>();
+    qmlRegisterUncreatableType<Model>("Model", 1, 0, "Model", "Model is created natively");
+    qmlRegisterUncreatableType<ClassModel>("Model", 1, 0, "ClassModel", "ClassModel is created natively");
+    qmlRegisterUncreatableType<ClassProp>("Model", 1, 0, "ClassProp", "ClassProp is created natively");
+    qmlRegisterUncreatableType<Links>("Model", 1, 0, "Links", "Links is created natively");
 
 }
 
@@ -43,12 +43,12 @@ Undoer *ModelLoader::undoer() const
     return Undoer::instance();
 }
 
-QObject * ModelLoader::create()
+Model *ModelLoader::create()
 {
     return new Model;
 }
 
-QObject * ModelLoader::load(const QString & fileName)
+Model *ModelLoader::load(const QString &fileName)
 {
     QUrl url(fileName);
     QFile f(url.toLocalFile());
@@ -80,7 +80,7 @@ QObject * ModelLoader::load(const QString & fileName)
     return ret;
 }
 
-bool ModelLoader::save(const QString & fileName, QObject *model) const
+bool ModelLoader::save(const QString &fileName, QObject *model) const
 {
     QUrl url(fileName);
 
@@ -108,7 +108,7 @@ bool ModelLoader::save(const QString & fileName, QObject *model) const
     return f.commit();
 }
 
-QObject * ModelLoader::loadFromJson(const QString &fileName)
+Model *ModelLoader::loadFromJson(const QString &fileName)
 {
     QUrl url(fileName);
     QFile f(url.toLocalFile());

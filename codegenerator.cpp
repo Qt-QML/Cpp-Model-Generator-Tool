@@ -645,7 +645,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             //%%register_types%%
             tmp.clear();
             for (const QString &name : names)
-                tmp += QString("    qmlRegisterType<%1>();\n").arg(name);
+                tmp += QString("    qmlRegisterUncreatableType<%1>(\"%2\", 1, 0, \"%1\", \"%1 is created natively\");\n").arg(name, model->name());
             cpp.replace("%%register_types%%", tmp);
 
             //ds >> count; Model::init(count);
