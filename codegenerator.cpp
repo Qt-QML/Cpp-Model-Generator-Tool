@@ -312,12 +312,12 @@ static QString generateClassModelH(const ClassModel *classModel, bool isRoot)
     }
 
     cpp += "\npublic:\n"
-            "    friend QDataStream& operator<< (QDataStream& ds, const %%Classname%% * p);\n"
-            "    friend QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n"
-            "\n"
-            "    friend QJsonObject toJson(const %%Classname%% *p);\n"
-            "    friend void fromJson(const QJsonValue &value, %%Classname%% *p);\n"
-            "\n";
+           "    friend QDataStream& operator<< (QDataStream& ds, const %%Classname%% * p);\n"
+           "    friend QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n"
+           "\n"
+           "    friend QJsonObject toJson(const %%Classname%% *p);\n"
+           "    friend void fromJson(const QJsonValue &value, %%Classname%% *p);\n"
+           "\n";
 
     if (!isRoot) {
         cpp += "    static void init(int count);\n"

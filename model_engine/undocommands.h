@@ -4,8 +4,8 @@
 #include <QUndoCommand>
 #include <QObject>
 #include <QElapsedTimer>
-#include "objectlist.h"
 
+#include "objectlist.h"
 
 class RemoveRowCmd : public QObject,  public QUndoCommand
 {
@@ -14,8 +14,8 @@ public:
     RemoveRowCmd(ObjectList *model, int index);
     ~RemoveRowCmd();
 
-    virtual void undo();
-    virtual void redo();
+    void undo() Q_DECL_OVERRIDE;
+    void redo() Q_DECL_OVERRIDE;
 
 private slots:
     void objDestroyed();
@@ -25,6 +25,7 @@ private:
     ObjectList *_model;
     int _index;
 };
+
 class MoveRowCmd : public QObject,  public QUndoCommand
 {
     Q_OBJECT
@@ -32,11 +33,11 @@ public:
     MoveRowCmd(ObjectList *model, int index, int toIndex);
     ~MoveRowCmd();
 
-    virtual void undo();
-    virtual void redo();
+    void undo() Q_DECL_OVERRIDE;
+    void redo() Q_DECL_OVERRIDE;
 
-    bool mergeWith(const QUndoCommand *other);
-    int id() const;
+    bool mergeWith(const QUndoCommand *other) Q_DECL_OVERRIDE;
+    int id() const Q_DECL_OVERRIDE;
 
 private slots:
     void objDestroyed();
@@ -48,7 +49,6 @@ private:
     int _index;
     int _toIndex;
     QElapsedTimer _time;
-
 };
 
 class InsertRowCmd : public QObject,  public QUndoCommand
@@ -58,8 +58,8 @@ public:
     InsertRowCmd(ObjectList *model, QObject *obj, int index);
     ~InsertRowCmd();
 
-    virtual void undo();
-    virtual void redo();
+    void undo() Q_DECL_OVERRIDE;
+    void redo() Q_DECL_OVERRIDE;
 
 private slots:
     void objDestroyed();
@@ -70,7 +70,6 @@ private:
     int _index;
 };
 
-
 class PropertyChangeCmd : public QObject, public QUndoCommand
 {
     Q_OBJECT
@@ -78,11 +77,11 @@ public:
     PropertyChangeCmd(QObject *obj, const QByteArray & name, const QVariant &val, const QVariant &newval);
     ~PropertyChangeCmd();
 
-    virtual void undo();
-    virtual void redo();
+    void undo() Q_DECL_OVERRIDE;
+    void redo() Q_DECL_OVERRIDE;
 
-    bool mergeWith(const QUndoCommand *other);
-    int id() const;
+    bool mergeWith(const QUndoCommand *other) Q_DECL_OVERRIDE;
+    int id() const Q_DECL_OVERRIDE;
 
 private slots:
     void objDestroyed();
@@ -95,6 +94,4 @@ private:
     QElapsedTimer _time;
 };
 
-
 #endif // UNDOCOMMANDS_H
-
