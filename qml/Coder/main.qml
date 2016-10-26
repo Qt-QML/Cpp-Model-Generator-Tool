@@ -126,7 +126,7 @@ ApplicationWindow {
         id: openDialog
         title: "Open Project File..."
 
-        nameFilters: [ "Coder projects (*.cod; *.json)" ]
+        nameFilters: [ "Coder projects (*.cod *.json)" ]
 
         onAccepted: {
             var urlString = fileUrl.toString();
