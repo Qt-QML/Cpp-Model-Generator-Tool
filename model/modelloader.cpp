@@ -8,11 +8,19 @@
 #include <QSaveFile>
 #include <QUrl>
 
-ModelLoader::ModelLoader(QObject *parent) :
-    QObject(parent)
+static QObject *modelLoaderProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
+{
+    Q_UNUSED(engine)
+    Q_UNUSED(scriptEngine)
+
+    return new ModelLoader;
+}
+
+void ModelLoader::registerTypes()
 {
     // singleton
     qmlRegisterType<Model>();
+    qmlRegisterSingletonType<ModelLoader>("Model", 1, 0, "ModelLoader", modelLoaderProvider);
 
     // object
     qmlRegisterType<ObjectList>();
@@ -25,7 +33,12 @@ ModelLoader::ModelLoader(QObject *parent) :
 
 }
 
-Undoer * ModelLoader::undoer() const
+ModelLoader::ModelLoader(QObject *parent) :
+    QObject(parent)
+{
+}
+
+Undoer *ModelLoader::undoer() const
 {
     return Undoer::instance();
 }

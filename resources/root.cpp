@@ -8,11 +8,19 @@
 #include <QSaveFile>
 #include <QUrl>
 
-%%Classname%%Loader::%%Classname%%Loader(QObject *parent) :
-    QObject(parent)
+static QObject *%%classname%%LoaderProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
+{
+    Q_UNUSED(engine)
+    Q_UNUSED(scriptEngine)
+
+    return new %%Classname%%Loader;
+}
+
+void %%Classname%%Loader::registerTypes()
 {
     // singleton
     qmlRegisterType<%%Classname%%>();
+    qmlRegisterSingletonType<%%Classname%%Loader>("%%Classname%%", 1, 0, "%%Classname%%Loader", %%classname%%LoaderProvider);
 
     // object
     qmlRegisterType<ObjectList>();
@@ -22,7 +30,12 @@
 %%register_types%%
 }
 
-Undoer * %%Classname%%Loader::undoer() const
+%%Classname%%Loader::%%Classname%%Loader(QObject *parent) :
+    QObject(parent)
+{
+}
+
+Undoer *%%Classname%%Loader::undoer() const
 {
     return Undoer::instance();
 }

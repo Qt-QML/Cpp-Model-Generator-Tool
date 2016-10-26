@@ -17,7 +17,8 @@ int main(int argc, char *argv[])
 
     QQmlContext *context = engine.rootContext();
 
-    context->setContextProperty("modelLoader", new ModelLoader);
+    ModelLoader::registerTypes();
+
     context->setContextProperty("codeGenerator", new CodeGenerator);
 
 #ifdef Q_OS_MAC
