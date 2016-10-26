@@ -7,7 +7,7 @@ class ClassModel : public QObject
 {
     Q_OBJECT
 public:
-    Q_INVOKABLE ClassModel(QObject *parent = 0);
+    Q_INVOKABLE ClassModel(QObject *parent = Q_NULLPTR);
     ~ClassModel();
 
 
@@ -62,20 +62,28 @@ private:
 private:
     QPointF _cpos;
 
-
 public:
     friend QDataStream& operator<< (QDataStream& ds, const ClassModel * p);
     friend QDataStream& operator>> (QDataStream& ds, ClassModel * p);
 
+    friend QJsonObject toJson(const ClassModel *p);
+    friend void fromJson(const QJsonValue &value, ClassModel *p);
+
     static void init(int count);
     static void load(QDataStream& ds);
     static void save(QDataStream& ds);
+    static void loadFromJson(const QJsonArray &);
+    static QJsonArray saveToJson();
     static void createIndex();
     static void clearIndex();
     static void deleteAll();
     static QList<ClassModel*> _ptrs;
-    static QHash<ClassModel*, quint32> _indexedPtrs;
+    static QHash<ClassModel*, int> _indexedPtrs;
 };
 QDataStream& operator<< (QDataStream& ds, const ClassModel * p);
 QDataStream& operator>> (QDataStream& ds, ClassModel * p);
+
+QJsonObject toJson(const ClassModel *p);
+void fromJson(const QJsonValue &value, ClassModel *p);
+
 #endif // CLASSMODEL_H

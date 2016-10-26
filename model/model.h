@@ -7,7 +7,7 @@ class Model : public QObject
 {
     Q_OBJECT
 public:
-    Q_INVOKABLE Model(QObject *parent = 0);
+    Q_INVOKABLE Model(QObject *parent = Q_NULLPTR);
     ~Model();
 
 
@@ -62,12 +62,18 @@ private:
 private:
     QString _name;
 
-
 public:
     friend QDataStream& operator<< (QDataStream& ds, const Model * p);
     friend QDataStream& operator>> (QDataStream& ds, Model * p);
 
+    friend QJsonObject toJson(const Model *p);
+    friend void fromJson(const QJsonValue &value, Model *p);
+
 };
 QDataStream& operator<< (QDataStream& ds, const Model * p);
 QDataStream& operator>> (QDataStream& ds, Model * p);
+
+QJsonObject toJson(const Model *p);
+void fromJson(const QJsonValue &value, Model *p);
+
 #endif // MODEL_H

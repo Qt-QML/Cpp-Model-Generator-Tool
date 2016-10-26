@@ -9,6 +9,26 @@
 #include <QTextStream>
 #include <QUrl>
 
+static void replacePropertyNames(QString &string, const ClassProp *classProp)
+{
+    QString Name = classProp->name();
+    QChar *ptr = Name.data();
+    *ptr = ptr->toUpper();
+
+    QString name = classProp->name();
+    ptr = name.data();
+    *ptr = ptr->toLower();
+
+    QString type = classProp->type();
+    if (type == "QObject*")
+        type = classProp->subType() + "*";// pointer to subclass
+
+    string.replace("%%proptype%%", type);
+    string.replace("%%subtype%%", classProp->subType());
+    string.replace("%%propname%%", name);
+    string.replace("%%Propname%%", Name);
+}
+
 static QString generateClassPropH(const ClassProp *classProp)
 {
     QString h;
@@ -47,23 +67,10 @@ static QString generateClassPropH(const ClassProp *classProp)
     if (classProp->type() == "QObject*")
     {
         h += "private slots:\n"
-                "    void %%propname%%DeletedSlot();\n";
+             "    void %%propname%%DeletedSlot();\n";
     }
-    QString Name = classProp->name();
-    QChar *ptr = Name.data();
-    *ptr = ptr->toUpper();
 
-    QString name = classProp->name();
-    ptr = name.data();
-    *ptr = ptr->toLower();
-
-    QString type = classProp->type();
-    if (type == "QObject*")
-        type = classProp->subType() + "*";// pointer to subclass
-
-    h.replace("%%proptype%%", type, Qt::CaseSensitive);
-    h.replace("%%propname%%", name, Qt::CaseSensitive);
-    h.replace("%%Propname%%", Name, Qt::CaseSensitive);
+    replacePropertyNames(h, classProp);
 
     return h;
 }
@@ -73,34 +80,33 @@ static QString generateClassPropCPP(const ClassProp *classProp, const QString &c
     QString cpp;
 
     ////////////////////////////////////////////////////////////
-    cpp += ""
-            "%%proptype%% %%Classname%%::%%propname%%() const\n"
-            "{\n"
-            "    return _%%propname%%;\n"
-            "}\n";
+    cpp += "%%proptype%% %%Classname%%::%%propname%%() const\n"
+           "{\n"
+           "    return _%%propname%%;\n"
+           "}\n";
 
 
     ////////////////////////////////////////////////////////////
     if (classProp->write())
     {
-        cpp +=  "void %%Classname%%::set%%Propname%%(%%proptype%% val)\n"
-                "{\n";
+        cpp += "void %%Classname%%::set%%Propname%%(%%proptype%% val)\n"
+               "{\n";
 
         cpp += "    if (val == _%%propname%%)\n"
-                "        return;\n\n";
+               "        return;\n\n";
 
         if (classProp->undo())
         {
             cpp += "    if (Undoer::instance()->noundo() == false)\n"
-                    "    {\n"
-                    "        set%%Propname%%Imp(val);\n"
-                    "        return;\n"
-                    "    }\n\n";
+                   "    {\n"
+                   "        set%%Propname%%Imp(val);\n"
+                   "        return;\n"
+                   "    }\n\n";
         }
 
         if (classProp->validate().length() > 0)
             cpp += "    if (!validate%%Propname%%(val))\n"
-                    "        return;\n\n";
+                   "        return;\n\n";
 
         if (classProp->undo())
         {
@@ -112,12 +118,12 @@ static QString generateClassPropCPP(const ClassProp *classProp, const QString &c
                 cpp += "QVariant::fromValue(_%%propname%%), QVariant::fromValue(val));\n";
 
             cpp += "    cmd->setText(\"Set %%Propname%%\");\n"
-                    "    Undoer::instance()->push(cmd);\n";
+                   "    Undoer::instance()->push(cmd);\n";
         }
         else if (classProp->notify()) // if no undo
         {
             cpp += "    _%%propname%% = val;\n"
-                    "    emit %%propname%%Changed();\n";
+                   "    emit %%propname%%Changed();\n";
         }
         cpp += "}\n";
     }
@@ -129,9 +135,9 @@ static QString generateClassPropCPP(const ClassProp *classProp, const QString &c
             "{\n";
     if (classProp->type() == "QObject*")
     {
-        cpp += "    if (_%%propname%% != NULL)\n"
+        cpp += "    if (_%%propname%%)\n"
                 "        disconnect(_%%propname%%, SIGNAL(destroyed()), this, SLOT(%%propname%%DeletedSlot()));\n";
-        cpp += "    if (val != NULL)\n"
+        cpp += "    if (val)\n"
                 "        connect(val, SIGNAL(destroyed()), this, SLOT(%%propname%%DeletedSlot()));\n\n";
     }
     cpp += "    _%%propname%% = val;\n";
@@ -152,29 +158,16 @@ static QString generateClassPropCPP(const ClassProp *classProp, const QString &c
     {
         cpp += "void %%Classname%%::%%propname%%DeletedSlot()\n"
                 "{\n"
-                "    set%%Propname%%(NULL);\n"
+                "    set%%Propname%%(Q_NULLPTR);\n"
                 "}\n";
     }
 
     ////////////////////////////////////////////////////////////////////////
 
-    QString Name = classProp->name();
-    QChar *ptr = Name.data();
-    *ptr = ptr->toUpper();
+    replacePropertyNames(cpp, classProp);
 
-    QString name = classProp->name();
-    ptr = name.data();
-    *ptr = ptr->toLower();
-
-    QString type = classProp->type();
-    if (type == "QObject*")
-        type = classProp->subType() + "*";// pointer to subclass
-
-    cpp.replace("%%validate%%", classProp->validate(), Qt::CaseSensitive);
-    cpp.replace("%%Classname%%", classname, Qt::CaseSensitive);
-    cpp.replace("%%propname%%", name, Qt::CaseSensitive);
-    cpp.replace("%%Propname%%", Name, Qt::CaseSensitive);
-    cpp.replace("%%proptype%%", type, Qt::CaseSensitive);
+    cpp.replace("%%validate%%", classProp->validate());
+    cpp.replace("%%Classname%%", classname);
 
     return cpp;
 }
@@ -184,38 +177,24 @@ static QString generateClassPropSave(const ClassProp *classProp)
     QString cpp;
 
     if (classProp->type() == "QObject*")
-        cpp += "    ds << %%proptype%%::_indexedPtrs.value(p->_%%propname%%);";
+    {
+        cpp += "    ds << %%subtype%%::_indexedPtrs.value(p->_%%propname%%);";
+    }
     else if (classProp->type() == "ObjectList*")
     {
         cpp += "    ds << ((qint32)(p->_%%propname%%->count()));\n"
-                "    for (int i=0; i<p->_%%propname%%->count(); i++)\n"
-                "    {\n"
-                "        %%proptype%% *o = p->_%%propname%%->get<%%proptype%%*>(i);\n"
-                "        ds << %%proptype%%::_indexedPtrs.value(o);\n"
-                "    }\n";
+               "    for (int i=0; i<p->_%%propname%%->count(); i++)\n"
+               "    {\n"
+               "        %%subtype%% *o = p->_%%propname%%->get<%%subtype%%*>(i);\n"
+               "        ds << %%subtype%%::_indexedPtrs.value(o);\n"
+               "    }\n";
     }
     else
+    {
         cpp += "    ds << p->_%%propname%%;\n";
+    }
 
-    QString Name = classProp->name();
-    QChar *ptr = Name.data();
-    *ptr = ptr->toUpper();
-
-    QString name = classProp->name();
-    ptr = name.data();
-    *ptr = ptr->toLower();
-
-    QString type = classProp->type();
-    if (type == "QObject*")
-        type = classProp->subType(); // pointer to subclass
-    else if (type == "ObjectList*")
-        type = classProp->subType(); // pointer to subclass
-
-
-    cpp.replace("%%propname%%", name, Qt::CaseSensitive);
-    cpp.replace("%%Propname%%", Name, Qt::CaseSensitive);
-    cpp.replace("%%proptype%%", type, Qt::CaseSensitive);
-
+    replacePropertyNames(cpp, classProp);
 
     return cpp;
 }
@@ -225,60 +204,103 @@ static QString generateClassPropLoad(const ClassProp *classProp)
     QString cpp;
 
     if (classProp->type() == "QObject*")
-        cpp += "    ds >> index; p->set%%Propname%%Imp((index == -1 ? NULL : %%proptype%%::_ptrs[index]));\n";
+    {
+        cpp += "    ds >> index; p->set%%Propname%%Imp((index == -1 ? Q_NULLPTR : %%subtype%%::_ptrs[index]));\n";
+    }
     else if (classProp->type() == "ObjectList*")
     {
         cpp += "    p->%%propname%%()->removeAll();\n"
-                "    ds >> count;\n"
-                "    for (quint32 i=0; i<count; i++)\n"
-                "    {\n"
-                "        ds >> index;\n"
-                "        %%proptype%% *obj  = (index == -1 ? NULL : %%proptype%%::_ptrs[index]);\n"
-                "        p->%%propname%%()->insertRow(obj,  p->%%propname%%()->count());\n"
-                "    }\n";
+               "    ds >> count;\n"
+               "    for (quint32 i=0; i<count; i++)\n"
+               "    {\n"
+               "        ds >> index;\n"
+               "        %%subtype%% *obj = (index == -1 ? Q_NULLPTR : %%subtype%%::_ptrs[index]);\n"
+               "        p->%%propname%%()->insertRow(obj,  p->%%propname%%()->count());\n"
+               "    }\n";
     }
     else
+    {
         cpp += "    ds >> p->_%%propname%%;\n";
+    }
 
-
-
-    QString Name = classProp->name();
-    QChar *ptr = Name.data();
-    *ptr = ptr->toUpper();
-
-    QString name = classProp->name();
-    ptr = name.data();
-    *ptr = ptr->toLower();
-
-    QString type = classProp->type();
-    if (type == "QObject*")
-        type = classProp->subType(); // pointer to subclass
-    else if (type == "ObjectList*")
-        type = classProp->subType(); // pointer to subclass
-
-
-    cpp.replace("%%propname%%", name, Qt::CaseSensitive);
-    cpp.replace("%%Propname%%", Name, Qt::CaseSensitive);
-    cpp.replace("%%proptype%%", type, Qt::CaseSensitive);
-
+    replacePropertyNames(cpp, classProp);
 
     return cpp;
 }
 
+static QString generateClassPropToJson(const ClassProp *classProp)
+{
+    QString cpp;
+
+    if (classProp->type() == "QObject*")
+    {
+        cpp += "    object.insert(QLatin1String(\"%%propname%%\"),\n"
+               "                  %%subtype%%::_indexedPtrs.value(p->_%%propname%%));\n";
+    }
+    else if (classProp->type() == "ObjectList*")
+    {
+        cpp += "    {\n"
+               "        QJsonArray array;\n"
+               "        for (QObject *o : p->_%%propname%%->list())\n"
+               "            array.append(%%subtype%%::_indexedPtrs.value(static_cast<%%subtype%%*>(o)));\n"
+               "        object.insert(QLatin1String(\"%%propname%%\"), array);\n"
+               "    }\n";
+    }
+    else
+    {
+        cpp += "    object.insert(QLatin1String(\"%%propname%%\"), toJson(p->_%%propname%%));\n";
+    }
+
+    replacePropertyNames(cpp, classProp);
+
+    return cpp;
+}
+
+static QString generateClassPropFromJson(const ClassProp *classProp)
+{
+    QString cpp;
+
+    if (classProp->type() == "QObject*")
+    {
+        cpp += "    {\n"
+               "        int index = object.value(QLatin1String(\"%%propname%%\")).toInt(-1);\n"
+               "        p->set%%Propname%%Imp(index == -1 ? Q_NULLPTR : %%subtype%%::_ptrs[index]);\n"
+               "    }\n";
+    }
+    else if (classProp->type() == "ObjectList*")
+    {
+        cpp += "    p->_%%propname%%->removeAll();\n"
+               "    for (const QJsonValue &value : object.value(\"%%propname%%\").toArray()) {\n"
+               "        int index = value.toInt(-1);\n"
+               "        %%subtype%% *obj = (index == -1 ? Q_NULLPTR : %%subtype%%::_ptrs[index]);\n"
+               "        p->%%propname%%()->insertRow(obj, p->_%%propname%%->count());\n"
+               "    }\n";
+    }
+    else
+    {
+        cpp += "    fromJson(object.value(QLatin1String(\"%%propname%%\")), p->_%%propname%%);\n";
+    }
+
+    replacePropertyNames(cpp, classProp);
+
+    return cpp;
+}
 
 static QString generateClassModelH(const ClassModel *classModel, bool isRoot)
 {
     QString cpp;
 
     cpp = "#ifndef %%CLASSNAME%%_H\n"
-            "#define %%CLASSNAME%%_H\n\n"
-            "#include \"classes.h\"\n\n"
-            "class %%Classname%% : public QObject\n"
-            "{\n"
-            "    Q_OBJECT\n"
-            "public:\n"
-            "    Q_INVOKABLE %%Classname%%(QObject *parent = 0);\n"
-            "    ~%%Classname%%();\n";
+          "#define %%CLASSNAME%%_H\n"
+          "\n"
+          "#include \"classes.h\"\n"
+          "\n"
+          "class %%Classname%% : public QObject\n"
+          "{\n"
+          "    Q_OBJECT\n"
+          "public:\n"
+          "    Q_INVOKABLE %%Classname%%(QObject *parent = Q_NULLPTR);\n"
+          "    ~%%Classname%%();\n";
 
     for (int i=0;i<classModel->properties()->count(); i++)
     {
@@ -286,25 +308,35 @@ static QString generateClassModelH(const ClassModel *classModel, bool isRoot)
         cpp += QString("\n\n    // ----[ ") + p->name() + " ] ----\n" + generateClassPropH(p) ;
     }
 
-    cpp += "\n\npublic:\n"
+    cpp += "\npublic:\n"
             "    friend QDataStream& operator<< (QDataStream& ds, const %%Classname%% * p);\n"
-            "    friend QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n\n";
+            "    friend QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n"
+            "\n"
+            "    friend QJsonObject toJson(const %%Classname%% *p);\n"
+            "    friend void fromJson(const QJsonValue &value, %%Classname%% *p);\n"
+            "\n";
 
     if (!isRoot) {
         cpp += "    static void init(int count);\n"
                "    static void load(QDataStream& ds);\n"
                "    static void save(QDataStream& ds);\n"
+               "    static void loadFromJson(const QJsonArray &);\n"
+               "    static QJsonArray saveToJson();\n"
                "    static void createIndex();\n"
                "    static void clearIndex();\n"
                "    static void deleteAll();\n"
                "    static QList<%%Classname%%*> _ptrs;\n"
-               "    static QHash<%%Classname%%*, quint32> _indexedPtrs;\n";
+               "    static QHash<%%Classname%%*, int> _indexedPtrs;\n";
     }
 
     cpp += "};\n"
            "QDataStream& operator<< (QDataStream& ds, const %%Classname%% * p);\n"
            "QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n"
-           "#endif // %%CLASSNAME%%_H\n";
+            "\n"
+            "QJsonObject toJson(const %%Classname%% *p);\n"
+            "void fromJson(const QJsonValue &value, %%Classname%% *p);\n"
+            "\n"
+            "#endif // %%CLASSNAME%%_H\n";
 
     QString ClassName = classModel->name();
     QChar *ptr = ClassName.data();
@@ -317,9 +349,9 @@ static QString generateClassModelH(const ClassModel *classModel, bool isRoot)
     QString CLASSNAME = classModel->name();
     CLASSNAME = CLASSNAME.toUpper();
 
-    cpp.replace("%%classname%%", className, Qt::CaseSensitive);
-    cpp.replace("%%Classname%%", ClassName, Qt::CaseSensitive);
-    cpp.replace("%%CLASSNAME%%", CLASSNAME, Qt::CaseSensitive);
+    cpp.replace("%%classname%%", className);
+    cpp.replace("%%Classname%%", ClassName);
+    cpp.replace("%%CLASSNAME%%", CLASSNAME);
 
     return cpp;
 }
@@ -334,7 +366,7 @@ static QString generateClassModelCPP(const ClassModel *classModel, bool isRoot)
     if (!isRoot) {
         cpp += "//// - [ static ] ----------------------------------------------------------------------------\n"
                "QList<%%Classname%%*> %%Classname%%::_ptrs;\n"
-               "QHash<%%Classname%% *, quint32> %%Classname%%::_indexedPtrs;\n\n"
+               "QHash<%%Classname%% *, int> %%Classname%%::_indexedPtrs;\n\n"
                "void %%Classname%%::init(int count)\n"
                "{\n"
                "    //clear current\n"
@@ -355,6 +387,20 @@ static QString generateClassModelCPP(const ClassModel *classModel, bool isRoot)
                "    while (i.hasNext())\n"
                "        ds << i.next();\n"
                "}\n\n"
+               "void %%Classname%%::loadFromJson(const QJsonArray &array)\n"
+               "{\n"
+               "    for (int i = 0; i < _ptrs.size(); ++i)\n"
+               "        fromJson(array.at(i), _ptrs[i]);\n"
+               "}\n"
+               "\n"
+               "QJsonArray %%Classname%%::saveToJson()\n"
+               "{\n"
+               "    QJsonArray array;\n"
+               "    for (auto p : _ptrs)\n"
+               "        array.append(toJson(p));\n"
+               "    return array;\n"
+               "}\n"
+               "\n"
                "void %%Classname%%::createIndex() //must be called for all classes before save for this class\n"
                "{\n"
                "    _indexedPtrs.clear();\n"
@@ -437,24 +483,45 @@ static QString generateClassModelCPP(const ClassModel *classModel, bool isRoot)
     for (int i=0;i<classModel->properties()->count(); i++)
     {
         ClassProp *p =  classModel->properties()->get<ClassProp*>(i);
-        if (p->save() == true)
+        if (p->save())
             cpp += QString("\n    // ----[ ") + p->name() + " LOAD ] ----\n" + generateClassPropLoad(p);
     }
     cpp += "\n\n    return ds;\n"
             "}\n";
 
+    cpp += "\n\nQJsonObject toJson(const %%Classname%% *p)\n"
+           "{\n"
+           "    QJsonObject object;\n";
 
+    for (QObject *obj : classModel->properties()->list()) {
+        ClassProp *p = static_cast<ClassProp*>(obj);
+        if (p->save())
+            cpp += generateClassPropToJson(p);
+    }
+
+    cpp += "    return object;\n"
+           "}\n\n";
+
+    cpp += "void fromJson(const QJsonValue &value, %%Classname%% *p)\n"
+           "{\n"
+           "    const QJsonObject object = value.toObject();\n";
+
+    for (QObject *obj : classModel->properties()->list()) {
+        ClassProp *p = static_cast<ClassProp*>(obj);
+        if (p->save())
+            cpp += generateClassPropFromJson(p);
+    }
+
+    cpp += "}\n";
 
     QString ClassName = classModel->name();
     QChar *ptr = ClassName.data();
     *ptr = ptr->toUpper();
 
-    QString className = classModel->name();
-    ptr = className.data();
-    *ptr = ptr->toLower();
+    QString classname = classModel->name().toLower();
 
-    cpp.replace("%%classname%%", className, Qt::CaseSensitive);
-    cpp.replace("%%Classname%%", ClassName, Qt::CaseSensitive);
+    cpp.replace("%%classname%%", classname);
+    cpp.replace("%%Classname%%", ClassName);
 
     return cpp;
 }
@@ -501,19 +568,20 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
         // now save classes.h
         {
             QString h;
-            h = "#ifndef CLASSES"+model->name().toUpper()+"_H\n"
-                    "#define CLASSES"+model->name().toUpper()+"_H\n\n"
-
-                    "#include <QObject>\n"
-                    "#include <QColor>\n"
-                    "#include <QImage>\n"
-                    "#include <QVariant>\n"
-                    "#include <QPoint>\n"
-                    "#include <QPointF>\n"
-                    "#include <QList>\n"
-                    "#include <QHash>\n"
-                    "#include <QSet>\n"
-                    "#include <QRectF>\n\n";
+            h = "#ifndef CLASSES" + model->name().toUpper() + "_H\n"
+                "#define CLASSES" + model->name().toUpper() + "_H\n"
+                "\n"
+                "#include <QObject>\n"
+                "#include <QColor>\n"
+                "#include <QImage>\n"
+                "#include <QVariant>\n"
+                "#include <QPoint>\n"
+                "#include <QPointF>\n"
+                "#include <QList>\n"
+                "#include <QHash>\n"
+                "#include <QSet>\n"
+                "#include <QRectF>\n"
+                "\n";
 
             QSet<QString> list;// first classes by this program, later classes that are external
             for (int i=0; i<classes->count(); i++)
@@ -534,7 +602,8 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             while (i.hasNext())
                 h += QString("class ") + i.next() + ";\n";
 
-            h += "#include \"../model_engine/objectlist.h\"\n"
+            h += "\n#include \"../model_engine/jsonconverters.h\"\n"
+                 "#include \"../model_engine/objectlist.h\"\n"
                  "#include \"../model_engine/undoer.h\"\n\n";
 
             for (int i=0; i<classes->count(); i++)
@@ -571,75 +640,90 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
 
             //qmlRegisterType<ObjectList>();
             //%%register_types%%
-            tmp = "";
-            for (int i = 0; i < names.size(); ++i)
-                tmp += QString("    qmlRegisterType<%1>();\n").arg(names.at(i));
-            cpp.replace("%%register_types%%", tmp, Qt::CaseSensitive);
+            tmp.clear();
+            for (const QString &name : names)
+                tmp += QString("    qmlRegisterType<%1>();\n").arg(name);
+            cpp.replace("%%register_types%%", tmp);
 
             //ds >> count; Model::init(count);
             //%%load_init%%
-            tmp = "";
-            for (int i = 0; i < names.size(); ++i)
-                tmp += QString("        ds >> count; %1::init(count);\n").arg(names.at(i));
-            cpp.replace("%%load_init%%", tmp, Qt::CaseSensitive);
+            tmp.clear();
+            for (const QString &name : names)
+                tmp += QString("    ds >> count; %1::init(count);\n").arg(name);
+            cpp.replace("%%load_init%%", tmp);
+
+            tmp.clear();
+            for (const QString &name : names)
+                tmp += QString("    %1::init(rootObject[\"%1\"].toArray().size());\n").arg(name);
+            cpp.replace("%%load_init_json%%", tmp);
 
             //qDebug() << "loadingodel: " << Model::_ptrs.count();
             //%%load_dbg_count%%
-            tmp = "";
-            for (int i = 0; i < names.size(); ++i)
-                tmp += QString("        qDebug() << \"loading %1: \" << %2::_ptrs.count();\n").arg(names.at(i)).arg(names.at(i));
-            cpp.replace("%%load_dbg_count%%", tmp, Qt::CaseSensitive);
+            tmp.clear();
+            for (const QString &name : names)
+                tmp += QString("    qDebug() << \"loading %1: \" << %1::_ptrs.count();\n").arg(name);
+            cpp.replace("%%load_dbg_count%%", tmp);
 
             // ClassModel::load(ds);
             //%%load%%
-            tmp = "";
-            for (int i = 0; i < names.size(); ++i)
-                tmp += QString("        %1::load(ds);\n").arg(names.at(i));
-            cpp.replace("%%load%%", tmp, Qt::CaseSensitive);
+            tmp.clear();
+            for (const QString &name : names)
+                tmp += QString("    %1::load(ds);\n").arg(name);
+            cpp.replace("%%load%%", tmp);
 
+            tmp.clear();
+            for (const QString &name : names)
+                tmp += QString("    %1::loadFromJson(rootObject[QLatin1String(\"%1\")].toArray());\n").arg(name);
+            cpp.replace("%%load_json%%", tmp);
 
             //Model::createIndex();
             //%%save_index%%
-            tmp = "";
-            for (int i = 0; i < names.size(); ++i)
-                tmp += QString("        %1::createIndex();\n").arg(names.at(i));
-            cpp.replace("%%save_index%%", tmp, Qt::CaseSensitive);
+            tmp.clear();
+            for (const QString &name : names)
+                tmp += QString("    %1::createIndex();\n").arg(name);
+            cpp.replace("%%save_index%%", tmp);
 
 
             //qDebug() << "saving Model: " << Model::_ptrs.count();
             //%%save_dbg_count%%
-            tmp = "";
-            for (int i = 0; i < names.size(); ++i)
-                tmp += QString("        qDebug() << \"saving %1: \" << %2::_ptrs.count();\n").arg(names.at(i)).arg(names.at(i));
-            cpp.replace("%%save_dbg_count%%", tmp, Qt::CaseSensitive);
+            tmp.clear();
+            for (const QString &name : names)
+                tmp += QString("    qDebug() << \"saving %1: \" << %1::_ptrs.count();\n").arg(name);
+            cpp.replace("%%save_dbg_count%%", tmp);
 
 
             //ds << (quint32)Model::_ptrs.count();
             //%%save_init%%
-            tmp = "";
-            for (int i = 0; i < names.size(); ++i)
-                tmp += QString("        ds << (quint32)%1::_ptrs.count();\n").arg(names.at(i));
-            cpp.replace("%%save_init%%", tmp, Qt::CaseSensitive);
+            tmp.clear();
+            for (const QString &name : names)
+                tmp += QString("    ds << (quint32)%1::_ptrs.count();\n").arg(name);
+            cpp.replace("%%save_init%%", tmp);
 
 
             //        Model::save(ds);
             //%%save%%
-            tmp = "";
-            for (int i = 0; i < names.size(); ++i)
-                tmp += QString("        %1::save(ds);\n").arg(names.at(i));
-            cpp.replace("%%save%%", tmp, Qt::CaseSensitive);
+            tmp.clear();
+            for (const QString &name : names)
+                tmp += QString("    %1::save(ds);\n").arg(name);
+            cpp.replace("%%save%%", tmp);
+
+            tmp.clear();
+            for (const QString &name : names)
+                tmp += QString("    rootObject.insert(QLatin1String(\"%1\"), %1::saveToJson());\n").arg(name);
+            cpp.replace("%%save_json%%", tmp);
+
 
 
             //Model::clearIndex();
             //%%save_clear%%
-            tmp = "";
-            for (int i = 0; i < names.size(); ++i)
-                tmp += QString("        %1::clearIndex();\n").arg(names.at(i));
-            cpp.replace("%%save_clear%%", tmp, Qt::CaseSensitive);
+            tmp.clear();
+            for (const QString &name : names)
+                tmp += QString("    %1::clearIndex();\n").arg(name);
+            cpp.replace("%%save_clear%%", tmp);
 
 
-            cpp.replace("%%classname%%", model->name().toLower(), Qt::CaseSensitive);
-            cpp.replace("%%Classname%%", model->name(), Qt::CaseSensitive);
+            cpp.replace("%%classname%%", model->name().toLower());
+            cpp.replace("%%Classname%%", model->name());
 
 
             QSaveFile cppfile(url.toLocalFile() + "/" + model->name().toLower() + "loader.cpp");
@@ -658,8 +742,8 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             QString cpp = tpl.readAll();
             tpl.close();
 
-            cpp.replace("%%Classname%%", model->name(), Qt::CaseSensitive);
-            cpp.replace("%%CLASSNAME%%", model->name().toUpper(), Qt::CaseSensitive);
+            cpp.replace("%%Classname%%", model->name());
+            cpp.replace("%%CLASSNAME%%", model->name().toUpper());
 
             QSaveFile cppfile(url.toLocalFile() + "/" + model->name().toLower() + "loader.h");
             cppfile.open(QIODevice::WriteOnly | QIODevice::Truncate);

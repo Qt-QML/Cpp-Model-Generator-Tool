@@ -32,16 +32,17 @@ qtcAddDeployment()
 
 HEADERS += \
     model/classes.h \
-    model/model.h \
-    model/classprop.h \
     model/classmodel.h \
+    model/classprop.h \
     model/links.h \
-    arrow.h \
-    codegenerator.h \
-    model_engine/undoer.h \
-    model_engine/undocommands.h \
+    model/model.h \
+    model/modelloader.h \
+    model_engine/jsonconverters.h \
     model_engine/objectlist.h \
-    model/modelloader.h
+    model_engine/undocommands.h \
+    model_engine/undoer.h \
+    arrow.h \
+    codegenerator.h
 
 OTHER_FILES += \
     templates/class.cpp \

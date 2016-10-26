@@ -22,6 +22,8 @@ public:
 
     int count() const { return _list.count(); }
 
+    const QList<QObject*> &list() const { return _list; }
+
     template <class X>
     QList<X> getProps(const char * name)
     {

@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QtQml>
 #include <QQmlEngine>
+#include <QJsonDocument>
 #include <QSaveFile>
 #include <QUrl>
 
@@ -36,75 +37,141 @@ QObject * ModelLoader::create()
 
 QObject * ModelLoader::load(const QString & fileName)
 {
-    Model *ret = new Model;
-
     QUrl url(fileName);
     QFile f(url.toLocalFile());
 
-    if (f.open(QIODevice::ReadOnly))
-    {
-        quint32 count;
-        QDataStream ds(&f);
+    if (!f.open(QIODevice::ReadOnly))
+        return nullptr;
 
-        // all objects must be created before setting values and linking pointers
-        ds >> count;
-        ds >> count; ClassModel::init(count);
-        ds >> count; ClassProp::init(count);
-        ds >> count; Links::init(count);
+    Model *ret = new Model;
 
-        qDebug() << "loading ClassModel: " << ClassModel::_ptrs.count();
-        qDebug() << "loading ClassProp: " << ClassProp::_ptrs.count();
-        qDebug() << "loading Links: " << Links::_ptrs.count();
+    quint32 count;
+    QDataStream ds(&f);
 
-        // load
-        ds >> ret;
-        ClassModel::load(ds);
-        ClassProp::load(ds);
-        Links::load(ds);
+    // all objects must be created before setting values and linking pointers
+    ds >> count;
+    ds >> count; ClassModel::init(count);
+    ds >> count; ClassProp::init(count);
+    ds >> count; Links::init(count);
 
-    }
+    qDebug() << "loading ClassModel: " << ClassModel::_ptrs.count();
+    qDebug() << "loading ClassProp: " << ClassProp::_ptrs.count();
+    qDebug() << "loading Links: " << Links::_ptrs.count();
+
+    // load
+    ds >> ret;
+    ClassModel::load(ds);
+    ClassProp::load(ds);
+    Links::load(ds);
 
     return ret;
 }
 
-void ModelLoader::save(const QString & fileName, QObject * model) const
+bool ModelLoader::save(const QString & fileName, QObject *model) const
 {
     QUrl url(fileName);
 
     QSaveFile f(url.toLocalFile());
-    if (f.open(QIODevice::WriteOnly))
-    {
-        QDataStream ds(&f);
+    if (!f.open(QIODevice::WriteOnly))
+        return false;
 
-        //create indices
-        ClassModel::createIndex();
-        ClassProp::createIndex();
-        Links::createIndex();
+    createIndices();
 
-        qDebug() << "saving ClassModel: " << ClassModel::_ptrs.count();
-        qDebug() << "saving ClassProp: " << ClassProp::_ptrs.count();
-        qDebug() << "saving Links: " << Links::_ptrs.count();
+    QDataStream ds(&f);
 
-        // save each class separately
-        ds << (quint32)1;
-        ds << (quint32)ClassModel::_ptrs.count();
-        ds << (quint32)ClassProp::_ptrs.count();
-        ds << (quint32)Links::_ptrs.count();
+    // save each class separately
+    ds << (quint32)1;
+    ds << (quint32)ClassModel::_ptrs.count();
+    ds << (quint32)ClassProp::_ptrs.count();
+    ds << (quint32)Links::_ptrs.count();
 
-        ds << (Model*)model;
-        ClassModel::save(ds);
-        ClassProp::save(ds);
-        Links::save(ds);
+    ds << static_cast<Model*>(model);
+    ClassModel::save(ds);
+    ClassProp::save(ds);
+    Links::save(ds);
 
-        f.commit();
+    clearIndices();
 
-        // free up memory
-        //Model::clearIndex();
-        ClassModel::clearIndex();
-        ClassProp::clearIndex();
-        Links::clearIndex();
-
-    }
+    return f.commit();
 }
 
+QObject * ModelLoader::loadFromJson(const QString &fileName)
+{
+    QUrl url(fileName);
+    QFile f(url.toLocalFile());
 
+    if (!f.open(QIODevice::ReadOnly))
+        return nullptr;
+
+    const QByteArray json = f.readAll();
+    QJsonParseError error;
+    const QJsonObject rootObject = QJsonDocument::fromJson(json, &error).object();
+    if (error.error != QJsonParseError::NoError)
+        return nullptr;
+
+    Model *ret = new Model;
+
+    // all objects must be created before setting values and linking pointers
+    ClassModel::init(rootObject["ClassModel"].toArray().size());
+    ClassProp::init(rootObject["ClassProp"].toArray().size());
+    Links::init(rootObject["Links"].toArray().size());
+
+    qDebug() << "loading ClassModel: " << ClassModel::_ptrs.count();
+    qDebug() << "loading ClassProp: " << ClassProp::_ptrs.count();
+    qDebug() << "loading Links: " << Links::_ptrs.count();
+
+    // load
+    fromJson(rootObject[QLatin1String("model")], ret);
+    ClassModel::loadFromJson(rootObject[QLatin1String("ClassModel")].toArray());
+    ClassProp::loadFromJson(rootObject[QLatin1String("ClassProp")].toArray());
+    Links::loadFromJson(rootObject[QLatin1String("Links")].toArray());
+
+    return ret;
+}
+
+bool ModelLoader::saveAsJson(const QString &fileName, QObject *model) const
+{
+    QUrl url(fileName);
+
+    QSaveFile f(url.toLocalFile());
+    if (!f.open(QIODevice::WriteOnly))
+        return false;
+
+    createIndices();
+
+    QJsonObject rootObject;
+
+    // save each class separately
+    rootObject.insert(QLatin1String("model"), toJson(static_cast<Model*>(model)));
+    rootObject.insert(QLatin1String("ClassModel"), ClassModel::saveToJson());
+    rootObject.insert(QLatin1String("ClassProp"), ClassProp::saveToJson());
+    rootObject.insert(QLatin1String("Links"), Links::saveToJson());
+
+    clearIndices();
+
+    f.write(QJsonDocument(rootObject).toJson());
+
+    return f.commit();
+}
+
+void ModelLoader::createIndices() const
+{
+    //create indices
+    ClassModel::createIndex();
+    ClassProp::createIndex();
+    Links::createIndex();
+
+    qDebug() << "saving ClassModel: " << ClassModel::_ptrs.count();
+    qDebug() << "saving ClassProp: " << ClassProp::_ptrs.count();
+    qDebug() << "saving Links: " << Links::_ptrs.count();
+
+}
+
+void ModelLoader::clearIndices() const
+{
+    // free up memory
+    ClassModel::clearIndex();
+    ClassProp::clearIndex();
+    Links::clearIndex();
+
+}

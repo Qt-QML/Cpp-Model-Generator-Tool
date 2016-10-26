@@ -1,0 +1,535 @@
+{
+    "ClassModel": [
+        {
+            "name": "Model",
+            "pos": {
+                "x": 29,
+                "y": 73.5
+            },
+            "properties": [
+                19,
+                3,
+                22,
+                23
+            ]
+        },
+        {
+            "name": "Links",
+            "pos": {
+                "x": 204,
+                "y": 323.5
+            },
+            "properties": [
+                0,
+                1
+            ]
+        },
+        {
+            "name": "ClassModel",
+            "pos": {
+                "x": 513,
+                "y": 162.5
+            },
+            "properties": [
+                6,
+                5,
+                4,
+                20
+            ]
+        },
+        {
+            "name": "ClassProp",
+            "pos": {
+                "x": 917,
+                "y": 16.5
+            },
+            "properties": [
+                15,
+                12,
+                13,
+                8,
+                11,
+                14,
+                7,
+                9,
+                16,
+                17,
+                21,
+                24,
+                10,
+                18
+            ]
+        },
+        {
+            "name": "",
+            "pos": {
+                "x": 91,
+                "y": 453.5
+            },
+            "properties": [
+            ]
+        },
+        {
+            "name": "Links",
+            "pos": {
+                "x": 386,
+                "y": 6
+            },
+            "properties": [
+                25,
+                26
+            ]
+        }
+    ],
+    "ClassProp": [
+        {
+            "count": 16843009,
+            "destruct": "",
+            "init": "_from = NULL;",
+            "name": "from",
+            "notify": true,
+            "null": true,
+            "read": true,
+            "save": true,
+            "subType": "ClassProp",
+            "type": "QObject*",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "_to = NULL;",
+            "name": "to",
+            "notify": true,
+            "null": true,
+            "read": true,
+            "save": true,
+            "subType": "ClassModel",
+            "type": "QObject*",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "",
+            "notify": false,
+            "null": false,
+            "read": false,
+            "save": false,
+            "subType": "",
+            "type": "",
+            "undo": false,
+            "validate": "",
+            "write": false
+        },
+        {
+            "count": 0,
+            "destruct": "_classes->deleteLater();",
+            "init": "_classes = new ObjectList(ClassModel::staticMetaObject, 0);",
+            "name": "classes",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "ClassModel",
+            "type": "ObjectList*",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "pos",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "QPointF",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "_name = \"unnamed\"",
+            "name": "name",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "QString",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "_properties->deleteLater()",
+            "init": "_properties = new ObjectList(ClassProp::staticMetaObject, 0)",
+            "name": "properties",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "ClassProp",
+            "type": "ObjectList*",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "_name = \"unnamed\"",
+            "name": "name",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "QString",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "undo",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "bool",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "type",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "QString",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "null",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "bool",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "validate",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "QString",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "save",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "bool",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "notify",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "bool",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "destruct",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "QString",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "read",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "bool",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "subType",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "QString",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "init",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "QString",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "cpos",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": false,
+            "subType": "",
+            "type": "QPointF",
+            "undo": false,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "_links->deleteLater()",
+            "init": "_links = new ObjectList(Links::staticMetaObject, 0)",
+            "name": "links",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "Links",
+            "type": "ObjectList*",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "cpos",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": false,
+            "subType": "",
+            "type": "QPointF",
+            "undo": false,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "write",
+            "notify": true,
+            "null": true,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "bool",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "_winRect = QRectF(100,100, 600, 400)",
+            "name": "winRect",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "QRectF",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "",
+            "name": "name",
+            "notify": true,
+            "null": false,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "QString",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "_count = 0",
+            "name": "count",
+            "notify": true,
+            "null": true,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "qint32",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "_from = Q_NULLPTR",
+            "name": "from",
+            "notify": true,
+            "null": true,
+            "read": true,
+            "save": true,
+            "subType": "ClassProp",
+            "type": "QObject*",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "_to = Q_NULLPTR",
+            "name": "to",
+            "notify": true,
+            "null": true,
+            "read": true,
+            "save": true,
+            "subType": "ClassModel",
+            "type": "QObject*",
+            "undo": true,
+            "validate": "",
+            "write": true
+        }
+    ],
+    "Links": [
+        {
+            "from": 6,
+            "to": 3
+        },
+        {
+            "from": 3,
+            "to": 2
+        },
+        {
+            "from": 26,
+            "to": 2
+        },
+        {
+            "from": 25,
+            "to": 3
+        },
+        {
+            "from": 19,
+            "to": 5
+        }
+    ],
+    "model": {
+        "classes": [
+            2,
+            3,
+            0,
+            5
+        ],
+        "links": [
+            4,
+            0,
+            1,
+            2,
+            3
+        ],
+        "name": "Model",
+        "winRect": {
+            "height": 852,
+            "width": 1440,
+            "x": 0,
+            "y": 44
+        }
+    }
+}
