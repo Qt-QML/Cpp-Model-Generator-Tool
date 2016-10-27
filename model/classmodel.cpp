@@ -86,10 +86,6 @@ ClassModel::~ClassModel()
 
 
 // ----[ properties ] ----
-ObjectList* ClassModel::properties() const
-{
-    return _properties;
-}
 void ClassModel::setProperties(ObjectList* val)
 {
     if (val == _properties)
@@ -112,10 +108,6 @@ void ClassModel::setPropertiesImp(ObjectList* val)
 }
 
 // ----[ name ] ----
-QString ClassModel::name() const
-{
-    return _name;
-}
 void ClassModel::setName(QString val)
 {
     if (val == _name)
@@ -138,10 +130,6 @@ void ClassModel::setNameImp(QString val)
 }
 
 // ----[ pos ] ----
-QPointF ClassModel::pos() const
-{
-    return _pos;
-}
 void ClassModel::setPos(QPointF val)
 {
     if (val == _pos)
@@ -164,10 +152,6 @@ void ClassModel::setPosImp(QPointF val)
 }
 
 // ----[ cpos ] ----
-QPointF ClassModel::cpos() const
-{
-    return _cpos;
-}
 void ClassModel::setCpos(QPointF val)
 {
     if (val == _cpos)
@@ -183,10 +167,6 @@ void ClassModel::setCposImp(QPointF val)
 }
 
 // ----[ enums ] ----
-ObjectList* ClassModel::enums() const
-{
-    return _enums;
-}
 void ClassModel::setEnums(ObjectList* val)
 {
     if (val == _enums)

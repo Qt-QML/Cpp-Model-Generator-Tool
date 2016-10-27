@@ -14,7 +14,7 @@ public:
     // ----[ links ] ----
 public:
     Q_PROPERTY(ObjectList* links  READ links  WRITE setLinks  NOTIFY linksChanged  )
-    ObjectList* links() const;
+    ObjectList* links() const { return _links; }
     void setLinks(ObjectList* val);
 signals:
     void linksChanged();
@@ -27,7 +27,7 @@ private:
     // ----[ classes ] ----
 public:
     Q_PROPERTY(ObjectList* classes  READ classes  WRITE setClasses  NOTIFY classesChanged  )
-    ObjectList* classes() const;
+    ObjectList* classes() const { return _classes; }
     void setClasses(ObjectList* val);
 signals:
     void classesChanged();
@@ -40,7 +40,7 @@ private:
     // ----[ winRect ] ----
 public:
     Q_PROPERTY(QRectF winRect  READ winRect  WRITE setWinRect  NOTIFY winRectChanged  )
-    QRectF winRect() const;
+    QRectF winRect() const { return _winRect; }
     void setWinRect(QRectF val);
 signals:
     void winRectChanged();
@@ -53,7 +53,7 @@ private:
     // ----[ name ] ----
 public:
     Q_PROPERTY(QString name  READ name  WRITE setName  NOTIFY nameChanged  )
-    QString name() const;
+    QString name() const { return _name; }
     void setName(QString val);
 signals:
     void nameChanged();

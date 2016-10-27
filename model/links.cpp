@@ -83,10 +83,6 @@ Links::~Links()
 
 
 // ----[ from ] ----
-ClassProp* Links::from() const
-{
-    return _from;
-}
 void Links::setFrom(ClassProp* val)
 {
     if (val == _from)
@@ -118,10 +114,6 @@ void Links::fromDeletedSlot()
 }
 
 // ----[ to ] ----
-ClassModel* Links::to() const
-{
-    return _to;
-}
 void Links::setTo(ClassModel* val)
 {
     if (val == _to)

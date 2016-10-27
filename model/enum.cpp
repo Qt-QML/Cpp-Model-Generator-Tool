@@ -84,10 +84,6 @@ Enum::~Enum()
 
 
 // ----[ name ] ----
-QString Enum::name() const
-{
-    return _name;
-}
 void Enum::setName(QString val)
 {
     if (val == _name)
@@ -110,10 +106,6 @@ void Enum::setNameImp(QString val)
 }
 
 // ----[ values ] ----
-ObjectList* Enum::values() const
-{
-    return _values;
-}
 void Enum::setValues(ObjectList* val)
 {
     if (val == _values)

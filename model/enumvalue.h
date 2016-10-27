@@ -14,7 +14,7 @@ public:
     // ----[ name ] ----
 public:
     Q_PROPERTY(QString name  READ name  WRITE setName  NOTIFY nameChanged  )
-    QString name() const;
+    QString name() const { return _name; }
     void setName(QString val);
 signals:
     void nameChanged();

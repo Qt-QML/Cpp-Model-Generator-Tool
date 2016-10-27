@@ -82,10 +82,6 @@ EnumValue::~EnumValue()
 
 
 // ----[ name ] ----
-QString EnumValue::name() const
-{
-    return _name;
-}
 void EnumValue::setName(QString val)
 {
     if (val == _name)
