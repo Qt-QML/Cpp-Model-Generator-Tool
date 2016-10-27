@@ -22,6 +22,8 @@ static void replacePropertyNames(QString &string, const ClassProp *classProp)
     QString type = classProp->type();
     if (type == "QObject*")
         type = classProp->subType() + "*";// pointer to subclass
+    else if (type == "enum")
+        type = classProp->subType();
 
     string.replace("%%proptype%%", type);
     string.replace("%%subtype%%", classProp->subType());
@@ -51,7 +53,7 @@ static QString generateClassPropH(const ClassProp *classProp)
         h += "    bool validate%%Propname%%(%%proptype%% val) const;\n";
 
     if (classProp->read())
-        h += "    %%proptype%% %%propname%%() const;\n";
+        h += "    %%proptype%% %%propname%%() const { return _%%propname%%; }\n";
 
     if (classProp->write())
         h += "    void set%%Propname%%(%%proptype%% val);\n";
@@ -78,13 +80,6 @@ static QString generateClassPropH(const ClassProp *classProp)
 static QString generateClassPropCPP(const ClassProp *classProp, const QString &classname)
 {
     QString cpp;
-
-    ////////////////////////////////////////////////////////////
-    cpp += "%%proptype%% %%Classname%%::%%propname%%() const\n"
-           "{\n"
-           "    return _%%propname%%;\n"
-           "}\n";
-
 
     ////////////////////////////////////////////////////////////
     if (classProp->write())
@@ -192,6 +187,10 @@ static QString generateClassPropSave(const ClassProp *classProp)
                "        ds << %%subtype%%::_indexedPtrs.value(o);\n"
                "    }\n";
     }
+    else if (classProp->type() == "enum")
+    {
+        cpp += "    ds << static_cast<qint32>(p->_%%propname%%);\n";
+    }
     else
     {
         cpp += "    ds << p->_%%propname%%;\n";
@@ -221,6 +220,14 @@ static QString generateClassPropLoad(const ClassProp *classProp)
                "        p->%%propname%%()->insertRow(obj,  p->%%propname%%()->count());\n"
                "    }\n";
     }
+    else if (classProp->type() == "enum")
+    {
+        cpp += "    {\n"
+               "        qint32 value;\n"
+               "        ds >> value;\n"
+               "        p->_%%propname%% = static_cast<typeof p->_%%propname%%>(value);\n"
+               "    }\n";
+    }
     else
     {
         cpp += "    ds >> p->_%%propname%%;\n";
@@ -248,6 +255,10 @@ static QString generateClassPropToJson(const ClassProp *classProp)
                "            array.append(%%subtype%%::_indexedPtrs.value(static_cast<%%subtype%%*>(o)));\n"
                "        object.insert(QLatin1String(\"%%propname%%\"), array);\n"
                "    }\n";
+    }
+    else if (classProp->type() == "enum")
+    {
+        cpp += "    object.insert(QLatin1String(\"%%propname%%\"), toJson(QVariant::fromValue(p->_%%propname%%).toString()));\n";
     }
     else
     {
@@ -279,6 +290,14 @@ static QString generateClassPropFromJson(const ClassProp *classProp)
                "        p->%%propname%%()->insertRow(obj, p->_%%propname%%->count());\n"
                "    }\n";
     }
+    else if (classProp->type() == "enum")
+    {
+        cpp += "    {\n"
+               "        QString string;\n"
+               "        fromJson(object.value(QLatin1String(\"%%propname%%\")), string);\n"
+               "        p->_%%propname%% = QVariant(string).value<typeof p->_%%propname%%>();\n"
+               "    }\n";
+    }
     else
     {
         cpp += "    fromJson(object.value(QLatin1String(\"%%propname%%\")), p->_%%propname%%);\n";
@@ -304,6 +323,25 @@ static QString generateClassModelH(const ClassModel *classModel, bool isRoot)
           "public:\n"
           "    Q_INVOKABLE %%Classname%%(QObject *parent = Q_NULLPTR);\n"
           "    ~%%Classname%%();\n";
+
+    for (int enumIndex = 0; enumIndex < classModel->enums()->count(); ++enumIndex)
+    {
+        Enum *enum_ = classModel->enums()->get<Enum*>(enumIndex);
+
+        cpp += QString("\n");
+        cpp += QString("    enum ") + enum_->name() + " {\n";
+
+        for (int valueIndex = 0; valueIndex < enum_->values()->count(); ++valueIndex)
+        {
+            EnumValue *enumValue = enum_->values()->get<EnumValue*>(valueIndex);
+
+            cpp += QString("        ") + enumValue->name();
+            cpp += (valueIndex + 1 == enum_->values()->count()) ? "\n" : ",\n";
+        }
+
+        cpp += QString("    };\n");
+        cpp += QString("    Q_ENUM(%1)\n").arg(enum_->name());
+    }
 
     for (int i=0;i<classModel->properties()->count(); i++)
     {

@@ -3,48 +3,37 @@ import QtQuick.Controls 1.3
 import QtQuick.Layouts 1.1
 
 SplitView {
-    id: splitview1
-
     property QtObject properties
-    property alias selectedIndex: tableList.currentRow
-
+    property alias selectedIndex: propertiesTable.currentRow
 
     ColumnLayout {
         width: 200
         height: parent.height
         TableView {
-            id: tableList
+            id: propertiesTable
 
             Layout.fillHeight: true
             frameVisible: false
             highlightOnFocus: false
             model: properties
 
-            itemDelegate: Text {
-                anchors.verticalCenter: parent ? parent.verticalCenter : undefined
-                text: styleData.value ? styleData.value.name : "";
-                color: styleData.textColor
-            }
+            itemDelegate: EditableTextDelegate { view: propertiesTable }
 
             TableViewColumn { title: "Properties"; role: "row" }
         }
+
         RowLayout {
             Button {
-                id: button1
-                x: 45
-                y: 379
                 text: " + "
                 onClicked: properties.addRowWithUndo()
             }
             Button {
-                id: button2
-                x: 45
-                y: 405
                 text: " - "
                 onClicked: properties.removeWithUndo(selectedIndex)
             }
         }
     }
+
     PropView {
         id: propView
 

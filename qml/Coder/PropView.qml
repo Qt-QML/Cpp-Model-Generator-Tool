@@ -77,6 +77,7 @@ Item {
             ListElement { text: "bool" ;    sub: false; }
             ListElement { text: "QObject*"; sub: true; }
             ListElement { text: "ObjectList*"; sub: true;}
+            ListElement { text: "enum"; sub: true;}
             ListElement { text: "double" ; sub: false; }
             ListElement { text: "float" ; sub: false; }
             ListElement { text: "qint32" ; sub: false; }
@@ -142,9 +143,14 @@ Item {
         x: 193
         y: 47
 
-        visible: type.currentType === "ObjectList*" || type.currentType === "QObject*"
+        visible: type.currentType === "ObjectList*" || type.currentType === "QObject*" || type.currentType === "enum"
 
-        placeholderText: "ptr type"
+        placeholderText: {
+            if (type.currentType === "enum")
+                return "enum type";
+            else
+                return "ptr type";
+        }
 
         text: selectedProp ? selectedProp.subType: "";
         onTextChanged: if (selectedProp) selectedProp.subType = text

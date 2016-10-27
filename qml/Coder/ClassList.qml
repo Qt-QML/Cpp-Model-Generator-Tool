@@ -6,7 +6,7 @@ Item {
     id: splitview2
 
     property QtObject model
-    property alias selectedIndex: tableList.currentRow
+    property alias selectedIndex: classesTable.currentRow
 
     ColumnLayout {
         anchors.fill: parent
@@ -19,8 +19,9 @@ Item {
             text: splitview2.model.name
             onTextChanged: splitview2.model.name = text
         }
+
         TableView {
-            id: tableList
+            id: classesTable
 
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -29,27 +30,17 @@ Item {
             highlightOnFocus: false
             model: splitview2.model.classes
 
-            itemDelegate: Text {
-                anchors.verticalCenter: parent ? parent.verticalCenter : undefined
-                text: styleData.value ? styleData.value.name : "";
-                color: styleData.textColor
-            }
+            itemDelegate: EditableTextDelegate { view: classesTable }
 
             TableViewColumn { title: "Classes"; role: "row" }
         }
+
         RowLayout {
             Button {
-                id: button1
-                x: 45
-                y: 379
                 text: " + "
                 onClicked: splitview2.model.classes.addRowWithUndo()
             }
-
             Button {
-                id: button2
-                x: 45
-                y: 405
                 text: " - "
                 onClicked: splitview2.model.classes.removeWithUndo(selectedIndex)
             }

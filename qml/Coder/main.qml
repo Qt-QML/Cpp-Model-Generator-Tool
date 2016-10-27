@@ -179,26 +179,39 @@ ApplicationWindow {
                 // do not bind as layout takes care of width
                 Component.onCompleted: width = 200
             }
-            SplitView {
-                height: parent.height
 
+            SplitView {
                 orientation: Qt.Vertical
                 Layout.minimumWidth: 50
                 Layout.fillWidth: true
+
                 ClassEditor {
                     id: classEditor
                     Layout.minimumHeight: 50
-                    Layout.fillWidth: true
 
                     classObj: modelRoot.classes.get(classList.selectedIndex)
                 }
-                PropertyEditor {
-                    id: propertyEditor
 
-                    opacity: (properties !== null? 1.0 : 0.0)
+                EnumEditor {
+                    id: enumEditor
+                    Layout.minimumHeight: 50
+                    height: 150
+
+                    opacity: enums ? 1.0 : 0.0
                     visible: opacity != 0.0
 
                     Layout.fillWidth: true
+                    enums: classEditor.classObj ? classEditor.classObj.enums : null
+                }
+
+                PropertyEditor {
+                    id: propertyEditor
+
+                    opacity: properties ? 1.0 : 0.0
+                    visible: opacity != 0.0
+
+                    Layout.fillHeight: true
+                    Layout.minimumHeight: 100
                     properties: classEditor.classObj ? classEditor.classObj.properties : null
                 }
             }
