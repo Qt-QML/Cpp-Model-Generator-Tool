@@ -35,19 +35,19 @@ static QString generateClassPropH(const ClassProp *classProp)
 {
     QString h;
 
-    h += "public:\n";
+    h += "public:\n"
+         "    Q_PROPERTY(%%proptype%% %%propname%%";
 
-    h += "    Q_PROPERTY(%%proptype%% %%propname%% ";
     if (classProp->read())
-        h += " READ %%propname%% ";
+        h += " READ %%propname%%";
     if (classProp->write())
-        h += " WRITE set%%Propname%% ";
+        h += " WRITE set%%Propname%%";
 
     if (classProp->notify())
-        h += " NOTIFY %%propname%%Changed ";
-    if (!classProp->write())
-        h += " CONSTANT ";
-    h += " )\n";
+        h += " NOTIFY %%propname%%Changed";
+    else if (!classProp->write())
+        h += " CONSTANT";
+    h += ")\n";
 
     if (classProp->validate().length() > 0)
         h += "    bool validate%%Propname%%(%%proptype%% val) const;\n";

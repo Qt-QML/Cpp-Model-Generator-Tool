@@ -13,7 +13,7 @@ public:
 
     // ----[ properties ] ----
 public:
-    Q_PROPERTY(ObjectList* properties  READ properties  WRITE setProperties  NOTIFY propertiesChanged  )
+    Q_PROPERTY(ObjectList* properties READ properties WRITE setProperties NOTIFY propertiesChanged)
     ObjectList* properties() const { return _properties; }
     void setProperties(ObjectList* val);
 signals:
@@ -26,7 +26,7 @@ private:
 
     // ----[ name ] ----
 public:
-    Q_PROPERTY(QString name  READ name  WRITE setName  NOTIFY nameChanged  )
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     QString name() const { return _name; }
     void setName(QString val);
 signals:
@@ -39,7 +39,7 @@ private:
 
     // ----[ pos ] ----
 public:
-    Q_PROPERTY(QPointF pos  READ pos  WRITE setPos  NOTIFY posChanged  )
+    Q_PROPERTY(QPointF pos READ pos WRITE setPos NOTIFY posChanged)
     QPointF pos() const { return _pos; }
     void setPos(QPointF val);
 signals:
@@ -52,7 +52,7 @@ private:
 
     // ----[ cpos ] ----
 public:
-    Q_PROPERTY(QPointF cpos  READ cpos  WRITE setCpos  NOTIFY cposChanged  )
+    Q_PROPERTY(QPointF cpos READ cpos WRITE setCpos NOTIFY cposChanged)
     QPointF cpos() const { return _cpos; }
     void setCpos(QPointF val);
 signals:
@@ -65,7 +65,7 @@ private:
 
     // ----[ enums ] ----
 public:
-    Q_PROPERTY(ObjectList* enums  READ enums  WRITE setEnums  NOTIFY enumsChanged  )
+    Q_PROPERTY(ObjectList* enums READ enums WRITE setEnums NOTIFY enumsChanged)
     ObjectList* enums() const { return _enums; }
     void setEnums(ObjectList* val);
 signals:

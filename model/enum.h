@@ -13,7 +13,7 @@ public:
 
     // ----[ name ] ----
 public:
-    Q_PROPERTY(QString name  READ name  WRITE setName  NOTIFY nameChanged  )
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     QString name() const { return _name; }
     void setName(QString val);
 signals:
@@ -26,7 +26,7 @@ private:
 
     // ----[ values ] ----
 public:
-    Q_PROPERTY(ObjectList* values  READ values  WRITE setValues  NOTIFY valuesChanged  )
+    Q_PROPERTY(ObjectList* values READ values WRITE setValues NOTIFY valuesChanged)
     ObjectList* values() const { return _values; }
     void setValues(ObjectList* val);
 signals:

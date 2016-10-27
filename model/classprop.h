@@ -13,7 +13,7 @@ public:
 
     // ----[ read ] ----
 public:
-    Q_PROPERTY(bool read  READ read  WRITE setRead  NOTIFY readChanged  )
+    Q_PROPERTY(bool read READ read WRITE setRead NOTIFY readChanged)
     bool read() const { return _read; }
     void setRead(bool val);
 signals:
@@ -26,7 +26,7 @@ private:
 
     // ----[ save ] ----
 public:
-    Q_PROPERTY(bool save  READ save  WRITE setSave  NOTIFY saveChanged  )
+    Q_PROPERTY(bool save READ save WRITE setSave NOTIFY saveChanged)
     bool save() const { return _save; }
     void setSave(bool val);
 signals:
@@ -39,7 +39,7 @@ private:
 
     // ----[ notify ] ----
 public:
-    Q_PROPERTY(bool notify  READ notify  WRITE setNotify  NOTIFY notifyChanged  )
+    Q_PROPERTY(bool notify READ notify WRITE setNotify NOTIFY notifyChanged)
     bool notify() const { return _notify; }
     void setNotify(bool val);
 signals:
@@ -52,7 +52,7 @@ private:
 
     // ----[ undo ] ----
 public:
-    Q_PROPERTY(bool undo  READ undo  WRITE setUndo  NOTIFY undoChanged  )
+    Q_PROPERTY(bool undo READ undo WRITE setUndo NOTIFY undoChanged)
     bool undo() const { return _undo; }
     void setUndo(bool val);
 signals:
@@ -65,7 +65,7 @@ private:
 
     // ----[ validate ] ----
 public:
-    Q_PROPERTY(QString validate  READ validate  WRITE setValidate  NOTIFY validateChanged  )
+    Q_PROPERTY(QString validate READ validate WRITE setValidate NOTIFY validateChanged)
     QString validate() const { return _validate; }
     void setValidate(QString val);
 signals:
@@ -78,7 +78,7 @@ private:
 
     // ----[ destruct ] ----
 public:
-    Q_PROPERTY(QString destruct  READ destruct  WRITE setDestruct  NOTIFY destructChanged  )
+    Q_PROPERTY(QString destruct READ destruct WRITE setDestruct NOTIFY destructChanged)
     QString destruct() const { return _destruct; }
     void setDestruct(QString val);
 signals:
@@ -91,7 +91,7 @@ private:
 
     // ----[ name ] ----
 public:
-    Q_PROPERTY(QString name  READ name  WRITE setName  NOTIFY nameChanged  )
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     QString name() const { return _name; }
     void setName(QString val);
 signals:
@@ -104,7 +104,7 @@ private:
 
     // ----[ type ] ----
 public:
-    Q_PROPERTY(QString type  READ type  WRITE setType  NOTIFY typeChanged  )
+    Q_PROPERTY(QString type READ type WRITE setType NOTIFY typeChanged)
     QString type() const { return _type; }
     void setType(QString val);
 signals:
@@ -117,7 +117,7 @@ private:
 
     // ----[ subType ] ----
 public:
-    Q_PROPERTY(QString subType  READ subType  WRITE setSubType  NOTIFY subTypeChanged  )
+    Q_PROPERTY(QString subType READ subType WRITE setSubType NOTIFY subTypeChanged)
     QString subType() const { return _subType; }
     void setSubType(QString val);
 signals:
@@ -130,7 +130,7 @@ private:
 
     // ----[ init ] ----
 public:
-    Q_PROPERTY(QString init  READ init  WRITE setInit  NOTIFY initChanged  )
+    Q_PROPERTY(QString init READ init WRITE setInit NOTIFY initChanged)
     QString init() const { return _init; }
     void setInit(QString val);
 signals:
@@ -143,7 +143,7 @@ private:
 
     // ----[ write ] ----
 public:
-    Q_PROPERTY(bool write  READ write  WRITE setWrite  NOTIFY writeChanged  )
+    Q_PROPERTY(bool write READ write WRITE setWrite NOTIFY writeChanged)
     bool write() const { return _write; }
     void setWrite(bool val);
 signals:
@@ -156,7 +156,7 @@ private:
 
     // ----[ count ] ----
 public:
-    Q_PROPERTY(qint32 count  READ count  WRITE setCount  NOTIFY countChanged  )
+    Q_PROPERTY(qint32 count READ count WRITE setCount NOTIFY countChanged)
     qint32 count() const { return _count; }
     void setCount(qint32 val);
 signals:
@@ -169,7 +169,7 @@ private:
 
     // ----[ null ] ----
 public:
-    Q_PROPERTY(bool null  READ null  WRITE setNull  NOTIFY nullChanged  )
+    Q_PROPERTY(bool null READ null WRITE setNull NOTIFY nullChanged)
     bool null() const { return _null; }
     void setNull(bool val);
 signals:
@@ -182,7 +182,7 @@ private:
 
     // ----[ cpos ] ----
 public:
-    Q_PROPERTY(QPointF cpos  READ cpos  WRITE setCpos  NOTIFY cposChanged  )
+    Q_PROPERTY(QPointF cpos READ cpos WRITE setCpos NOTIFY cposChanged)
     QPointF cpos() const { return _cpos; }
     void setCpos(QPointF val);
 signals:

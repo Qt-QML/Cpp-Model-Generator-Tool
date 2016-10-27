@@ -13,7 +13,7 @@ public:
 
     // ----[ from ] ----
 public:
-    Q_PROPERTY(ClassProp* from  READ from  WRITE setFrom  NOTIFY fromChanged  )
+    Q_PROPERTY(ClassProp* from READ from WRITE setFrom NOTIFY fromChanged)
     ClassProp* from() const { return _from; }
     void setFrom(ClassProp* val);
 signals:
@@ -28,7 +28,7 @@ private slots:
 
     // ----[ to ] ----
 public:
-    Q_PROPERTY(ClassModel* to  READ to  WRITE setTo  NOTIFY toChanged  )
+    Q_PROPERTY(ClassModel* to READ to WRITE setTo NOTIFY toChanged)
     ClassModel* to() const { return _to; }
     void setTo(ClassModel* val);
 signals:
