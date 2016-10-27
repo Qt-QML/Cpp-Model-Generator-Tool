@@ -83,10 +83,6 @@ ClassProp::~ClassProp()
 
 
 // ----[ read ] ----
-bool ClassProp::read() const
-{
-    return _read;
-}
 void ClassProp::setRead(bool val)
 {
     if (val == _read)
@@ -109,10 +105,6 @@ void ClassProp::setReadImp(bool val)
 }
 
 // ----[ save ] ----
-bool ClassProp::save() const
-{
-    return _save;
-}
 void ClassProp::setSave(bool val)
 {
     if (val == _save)
@@ -135,10 +127,6 @@ void ClassProp::setSaveImp(bool val)
 }
 
 // ----[ notify ] ----
-bool ClassProp::notify() const
-{
-    return _notify;
-}
 void ClassProp::setNotify(bool val)
 {
     if (val == _notify)
@@ -161,10 +149,6 @@ void ClassProp::setNotifyImp(bool val)
 }
 
 // ----[ undo ] ----
-bool ClassProp::undo() const
-{
-    return _undo;
-}
 void ClassProp::setUndo(bool val)
 {
     if (val == _undo)
@@ -187,10 +171,6 @@ void ClassProp::setUndoImp(bool val)
 }
 
 // ----[ validate ] ----
-QString ClassProp::validate() const
-{
-    return _validate;
-}
 void ClassProp::setValidate(QString val)
 {
     if (val == _validate)
@@ -213,10 +193,6 @@ void ClassProp::setValidateImp(QString val)
 }
 
 // ----[ destruct ] ----
-QString ClassProp::destruct() const
-{
-    return _destruct;
-}
 void ClassProp::setDestruct(QString val)
 {
     if (val == _destruct)
@@ -239,10 +215,6 @@ void ClassProp::setDestructImp(QString val)
 }
 
 // ----[ name ] ----
-QString ClassProp::name() const
-{
-    return _name;
-}
 void ClassProp::setName(QString val)
 {
     if (val == _name)
@@ -265,10 +237,6 @@ void ClassProp::setNameImp(QString val)
 }
 
 // ----[ type ] ----
-QString ClassProp::type() const
-{
-    return _type;
-}
 void ClassProp::setType(QString val)
 {
     if (val == _type)
@@ -291,10 +259,6 @@ void ClassProp::setTypeImp(QString val)
 }
 
 // ----[ subType ] ----
-QString ClassProp::subType() const
-{
-    return _subType;
-}
 void ClassProp::setSubType(QString val)
 {
     if (val == _subType)
@@ -317,10 +281,6 @@ void ClassProp::setSubTypeImp(QString val)
 }
 
 // ----[ init ] ----
-QString ClassProp::init() const
-{
-    return _init;
-}
 void ClassProp::setInit(QString val)
 {
     if (val == _init)
@@ -343,10 +303,6 @@ void ClassProp::setInitImp(QString val)
 }
 
 // ----[ write ] ----
-bool ClassProp::write() const
-{
-    return _write;
-}
 void ClassProp::setWrite(bool val)
 {
     if (val == _write)
@@ -369,10 +325,6 @@ void ClassProp::setWriteImp(bool val)
 }
 
 // ----[ count ] ----
-qint32 ClassProp::count() const
-{
-    return _count;
-}
 void ClassProp::setCount(qint32 val)
 {
     if (val == _count)
@@ -395,10 +347,6 @@ void ClassProp::setCountImp(qint32 val)
 }
 
 // ----[ null ] ----
-bool ClassProp::null() const
-{
-    return _null;
-}
 void ClassProp::setNull(bool val)
 {
     if (val == _null)
@@ -421,10 +369,6 @@ void ClassProp::setNullImp(bool val)
 }
 
 // ----[ cpos ] ----
-QPointF ClassProp::cpos() const
-{
-    return _cpos;
-}
 void ClassProp::setCpos(QPointF val)
 {
     if (val == _cpos)

@@ -17,10 +17,6 @@ Model::~Model()
 
 
 // ----[ links ] ----
-ObjectList* Model::links() const
-{
-    return _links;
-}
 void Model::setLinks(ObjectList* val)
 {
     if (val == _links)
@@ -43,10 +39,6 @@ void Model::setLinksImp(ObjectList* val)
 }
 
 // ----[ classes ] ----
-ObjectList* Model::classes() const
-{
-    return _classes;
-}
 void Model::setClasses(ObjectList* val)
 {
     if (val == _classes)
@@ -69,10 +61,6 @@ void Model::setClassesImp(ObjectList* val)
 }
 
 // ----[ winRect ] ----
-QRectF Model::winRect() const
-{
-    return _winRect;
-}
 void Model::setWinRect(QRectF val)
 {
     if (val == _winRect)
@@ -95,10 +83,6 @@ void Model::setWinRectImp(QRectF val)
 }
 
 // ----[ name ] ----
-QString Model::name() const
-{
-    return _name;
-}
 void Model::setName(QString val)
 {
     if (val == _name)

@@ -13,10 +13,10 @@ PropertyChangeCmd::PropertyChangeCmd(QObject *obj, const QByteArray & name, cons
     connect(_obj, SIGNAL(destroyed()), this, SLOT(objDestroyed()));
 
     if (_newval.userType() >= QMetaType::User)
-        if (qvariant_cast<QObject *>(_newval) != NULL)
+        if (qvariant_cast<QObject *>(_newval))
             connect( qvariant_cast<QObject *>(_newval), SIGNAL(destroyed()), this, SLOT(objDestroyed()));
     if (_val.userType() >= QMetaType::User)
-        if (qvariant_cast<QObject *>(_val) != NULL)
+        if (qvariant_cast<QObject *>(_val))
             connect( qvariant_cast<QObject *>(_val), SIGNAL(destroyed()), this, SLOT(objDestroyed()));
 }
 
@@ -33,24 +33,23 @@ void PropertyChangeCmd::objDestroyed()
     qDebug() << "PropertyChangeCmd::objDestroyed";
 
     setText("null");
-    _obj = NULL;
+    _obj = Q_NULLPTR;
     //now this Cmd does nothing
 }
 
 PropertyChangeCmd::~PropertyChangeCmd()
 {
-
 }
 
 void PropertyChangeCmd::undo()
 {
-    if (_obj != NULL)
+    if (_obj)
         _obj->setProperty(_name.data(), _val);
 }
 
 void PropertyChangeCmd::redo()
 {
-    if (_obj != NULL)
+    if (_obj)
         _obj->setProperty(_name.data(), _newval);
 }
 
@@ -83,11 +82,11 @@ int PropertyChangeCmd::id() const
 
 RemoveRowCmd::RemoveRowCmd(ObjectList *model, int index)
     :
-      _obj(NULL),
+      _obj(Q_NULLPTR),
       _model(model),
       _index(index)
 {
-    setText("Remove row");
+    setText("Remove Row");
 }
 
 RemoveRowCmd::~RemoveRowCmd()
@@ -96,13 +95,13 @@ RemoveRowCmd::~RemoveRowCmd()
 
 void RemoveRowCmd::undo()
 {
-    if (_obj != NULL)
+    if (_obj)
         _model->insertRow(_obj, _index);
 }
 
 void RemoveRowCmd::redo()
 {
-    if (_obj != NULL)
+    if (_obj)
         disconnect(_obj, SIGNAL(destroyed()), this, SLOT(objDestroyed()));
 
     _obj = _model->get(_index);
@@ -119,7 +118,7 @@ void RemoveRowCmd::objDestroyed()
 
     setText("null");
 
-    _obj = NULL;
+    _obj = Q_NULLPTR;
     //now this Cmd does nothing
 }
 
@@ -129,13 +128,13 @@ void RemoveRowCmd::objDestroyed()
 
 MoveRowCmd::MoveRowCmd(ObjectList *model, int index, int toIndex)
     :
-      _obj1(NULL),
-      _obj2(NULL),
+      _obj1(Q_NULLPTR),
+      _obj2(Q_NULLPTR),
       _model(model),
       _index(index),
       _toIndex(toIndex)
 {
-    setText("Move row");
+    setText("Move Row");
 
     _time.start();
 
@@ -152,13 +151,13 @@ MoveRowCmd::~MoveRowCmd()
 
 void MoveRowCmd::undo()
 {
-    if (_obj1 != NULL && _obj2 != NULL)
+    if (_obj1 && _obj2)
         _model->moveRows(QModelIndex(), _toIndex, 1, QModelIndex(), _index);
 }
 
 void MoveRowCmd::redo()
 {
-    if (_obj1 != NULL && _obj2 != NULL)
+    if (_obj1 && _obj2)
         _model->moveRows(QModelIndex(), _index, 1,  QModelIndex(), _toIndex);
 }
 
@@ -169,8 +168,8 @@ void MoveRowCmd::objDestroyed()
 
     setText("null");
 
-    _obj1 = NULL;
-    _obj2 = NULL;
+    _obj1 = Q_NULLPTR;
+    _obj2 = Q_NULLPTR;
 }
 
 bool MoveRowCmd::mergeWith(const QUndoCommand *other)
@@ -211,7 +210,7 @@ InsertRowCmd::InsertRowCmd(ObjectList *model, QObject *obj, int index)
 {
     connect(_obj, SIGNAL(destroyed()), this, SLOT(objDestroyed()));
 
-    setText("insert row");
+    setText("Insert Row");
 }
 
 InsertRowCmd::~InsertRowCmd()
@@ -220,13 +219,13 @@ InsertRowCmd::~InsertRowCmd()
 
 void InsertRowCmd::undo()
 {
-    if (_obj != NULL)
+    if (_obj)
         _model->removeRow(_index);
 }
 
 void InsertRowCmd::redo()
 {
-    if (_obj != NULL)
+    if (_obj)
         _model->insertRow(_obj, _index);
 }
 
@@ -238,6 +237,6 @@ void InsertRowCmd::objDestroyed()
 
     setText("null");
 
-    _obj = NULL;
+    _obj = Q_NULLPTR;
     //now this Cmd does nothing
 }

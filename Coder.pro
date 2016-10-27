@@ -21,7 +21,9 @@ SOURCES += main.cpp \
     model/links.cpp \
     arrow.cpp \
     codegenerator.cpp \
-    model/modelloader.cpp
+    model/modelloader.cpp \
+    model/enum.cpp \
+    model/enumvalue.cpp
 
 # Installation path
 # target.path =
@@ -42,7 +44,9 @@ HEADERS += \
     model_engine/undocommands.h \
     model_engine/undoer.h \
     arrow.h \
-    codegenerator.h
+    codegenerator.h \
+    model/enum.h \
+    model/enumvalue.h
 
 OTHER_FILES += \
     templates/class.cpp \

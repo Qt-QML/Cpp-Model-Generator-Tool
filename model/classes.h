@@ -12,9 +12,11 @@
 #include <QSet>
 #include <QRectF>
 
-class ClassProp;
-class Links;
 class ClassModel;
+class ClassProp;
+class Enum;
+class EnumValue;
+class Links;
 class Model;
 
 #include "../model_engine/jsonconverters.h"
@@ -25,5 +27,7 @@ class Model;
 #include "classprop.h"
 #include "model.h"
 #include "links.h"
+#include "enum.h"
+#include "enumvalue.h"
 
 #endif // CLASSESMODEL_H

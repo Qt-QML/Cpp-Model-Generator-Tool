@@ -3,6 +3,7 @@ import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick 2.4
+import Model 1.0
 
 ApplicationWindow {
 //    x: root.model.winRect.x
@@ -14,8 +15,8 @@ ApplicationWindow {
 //    onYChanged: root.model.winRect.y = y
 //    onWidthChanged: root.model.winRect.width = width
 //    onHeightChanged: root.model.winRect.height = height
-    property QtObject modelRoot: null
-    Component.onCompleted: modelRoot = modelLoader.create();
+    property QtObject modelRoot
+    Component.onCompleted: modelRoot = ModelLoader.create();
 
     width: 1200
     height: 600
@@ -66,7 +67,7 @@ ApplicationWindow {
         id: newAction
         text: "New Project"
         iconName: "file-new"
-        onTriggered: modelRoot = modelLoader.create();
+        onTriggered: modelRoot = ModelLoader.create();
     }
     Action {
         id: openAction
@@ -84,17 +85,17 @@ ApplicationWindow {
     }
     Action {
         id: undoAction
-        text: "Undo " + modelLoader.undoer().undoText
+        text: "Undo " + ModelLoader.undoer().undoText
         shortcut: StandardKey.Undo
         iconSource: "qrc:/resources/undo.png"
-        onTriggered: modelLoader.undoer().undo()
+        onTriggered: ModelLoader.undoer().undo()
     }
     Action {
         id: redoAction
-        text: "Redo " + modelLoader.undoer().redoText
+        text: "Redo " + ModelLoader.undoer().redoText
         shortcut: StandardKey.Redo
         iconSource: "qrc:/resources/redo.png"
-        onTriggered: modelLoader.undoer().redo()
+        onTriggered: ModelLoader.undoer().redo()
     }
     Action {
         id: burnAction
@@ -125,14 +126,14 @@ ApplicationWindow {
         id: openDialog
         title: "Open Project File..."
 
-        nameFilters: [ "Coder projects (*.cod; *.json)" ]
+        nameFilters: [ "Coder projects (*.cod *.json)" ]
 
         onAccepted: {
             var urlString = fileUrl.toString();
             if (urlString.substring(urlString.lastIndexOf(".") + 1) === "cod")
-                modelRoot = modelLoader.load(fileUrl);
+                modelRoot = ModelLoader.load(fileUrl);
             else
-                modelRoot = modelLoader.loadFromJson(fileUrl);
+                modelRoot = ModelLoader.loadFromJson(fileUrl);
         }
     }
 
@@ -149,9 +150,9 @@ ApplicationWindow {
 
         onAccepted: {
             if (selectedNameFilter === "Coder project (*.cod)")
-                modelLoader.save(fileUrl, modelRoot)
+                ModelLoader.save(fileUrl, modelRoot)
             else
-                modelLoader.saveAsJson(fileUrl, modelRoot)
+                ModelLoader.saveAsJson(fileUrl, modelRoot)
         }
     }
 
@@ -178,26 +179,39 @@ ApplicationWindow {
                 // do not bind as layout takes care of width
                 Component.onCompleted: width = 200
             }
-            SplitView {
-                height: parent.height
 
+            SplitView {
                 orientation: Qt.Vertical
                 Layout.minimumWidth: 50
                 Layout.fillWidth: true
+
                 ClassEditor {
                     id: classEditor
                     Layout.minimumHeight: 50
-                    Layout.fillWidth: true
 
                     classObj: modelRoot.classes.get(classList.selectedIndex)
                 }
-                PropertyEditor {
-                    id: propertyEditor
 
-                    opacity: (properties !== null? 1.0 : 0.0)
+                EnumEditor {
+                    id: enumEditor
+                    Layout.minimumHeight: 50
+                    height: 150
+
+                    opacity: enums ? 1.0 : 0.0
                     visible: opacity != 0.0
 
                     Layout.fillWidth: true
+                    enums: classEditor.classObj ? classEditor.classObj.enums : null
+                }
+
+                PropertyEditor {
+                    id: propertyEditor
+
+                    opacity: properties ? 1.0 : 0.0
+                    visible: opacity != 0.0
+
+                    Layout.fillHeight: true
+                    Layout.minimumHeight: 100
                     properties: classEditor.classObj ? classEditor.classObj.properties : null
                 }
             }

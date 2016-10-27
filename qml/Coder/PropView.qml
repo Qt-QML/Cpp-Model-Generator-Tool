@@ -58,7 +58,7 @@ Item {
         placeholderText: "Name"
 
         text: selectedProp ? selectedProp.name : ""
-        onTextChanged: selectedProp.name = text
+        onTextChanged: if (selectedProp) selectedProp.name = text
     }
 
     ComboBox {
@@ -77,6 +77,7 @@ Item {
             ListElement { text: "bool" ;    sub: false; }
             ListElement { text: "QObject*"; sub: true; }
             ListElement { text: "ObjectList*"; sub: true;}
+            ListElement { text: "enum"; sub: true;}
             ListElement { text: "double" ; sub: false; }
             ListElement { text: "float" ; sub: false; }
             ListElement { text: "qint32" ; sub: false; }
@@ -106,7 +107,7 @@ Item {
                 }
         }
         onCurrentIndexChanged: {
-            if (selectedProp !== null)
+            if (selectedProp)
                 selectedProp.type = items.get(currentIndex).text;
         }
     }
@@ -142,12 +143,17 @@ Item {
         x: 193
         y: 47
 
-        visible: type.currentType === "ObjectList*" || type.currentType === "QObject*"
+        visible: type.currentType === "ObjectList*" || type.currentType === "QObject*" || type.currentType === "enum"
 
-        placeholderText: "ptr type"
+        placeholderText: {
+            if (type.currentType === "enum")
+                return "enum type";
+            else
+                return "ptr type";
+        }
 
         text: selectedProp ? selectedProp.subType: "";
-        onTextChanged: selectedProp.subType = text
+        onTextChanged: if (selectedProp) selectedProp.subType = text
     }
 
     TextField {
@@ -160,7 +166,7 @@ Item {
 
         placeholderText: "init count"
         text: selectedProp ? selectedProp.count : "";
-        onTextChanged: selectedProp.count = text
+        onTextChanged: if (selectedProp) selectedProp.count = text
     }
 
     CheckBox {
@@ -195,7 +201,7 @@ Item {
         placeholderText: "_name = \"untitled\"";
 
         text: selectedProp ? selectedProp.init : ""
-        onTextChanged: selectedProp.init = text
+        onTextChanged: if (selectedProp) selectedProp.init = text
     }
 
     TextField {
@@ -224,7 +230,7 @@ Item {
         placeholderText: "Text Field"
 
         text: selectedProp ? selectedProp.destruct : ""
-        onTextChanged: selectedProp.destruct = text
+        onTextChanged: if (selectedProp) selectedProp.destruct = text
     }
 
     CheckBox {

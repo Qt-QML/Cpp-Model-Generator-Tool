@@ -22,6 +22,8 @@ static void replacePropertyNames(QString &string, const ClassProp *classProp)
     QString type = classProp->type();
     if (type == "QObject*")
         type = classProp->subType() + "*";// pointer to subclass
+    else if (type == "enum")
+        type = classProp->subType();
 
     string.replace("%%proptype%%", type);
     string.replace("%%subtype%%", classProp->subType());
@@ -33,25 +35,25 @@ static QString generateClassPropH(const ClassProp *classProp)
 {
     QString h;
 
-    h += "public:\n";
+    h += "public:\n"
+         "    Q_PROPERTY(%%proptype%% %%propname%%";
 
-    h += "    Q_PROPERTY(%%proptype%% %%propname%% ";
     if (classProp->read())
-        h += " READ %%propname%% ";
+        h += " READ %%propname%%";
     if (classProp->write())
-        h += " WRITE set%%Propname%% ";
+        h += " WRITE set%%Propname%%";
 
     if (classProp->notify())
-        h += " NOTIFY %%propname%%Changed ";
-    if (!classProp->write())
-        h += " CONSTANT ";
-    h += " )\n";
+        h += " NOTIFY %%propname%%Changed";
+    else if (!classProp->write())
+        h += " CONSTANT";
+    h += ")\n";
 
     if (classProp->validate().length() > 0)
         h += "    bool validate%%Propname%%(%%proptype%% val) const;\n";
 
     if (classProp->read())
-        h += "    %%proptype%% %%propname%%() const;\n";
+        h += "    %%proptype%% %%propname%%() const { return _%%propname%%; }\n";
 
     if (classProp->write())
         h += "    void set%%Propname%%(%%proptype%% val);\n";
@@ -78,13 +80,6 @@ static QString generateClassPropH(const ClassProp *classProp)
 static QString generateClassPropCPP(const ClassProp *classProp, const QString &classname)
 {
     QString cpp;
-
-    ////////////////////////////////////////////////////////////
-    cpp += "%%proptype%% %%Classname%%::%%propname%%() const\n"
-           "{\n"
-           "    return _%%propname%%;\n"
-           "}\n";
-
 
     ////////////////////////////////////////////////////////////
     if (classProp->write())
@@ -157,9 +152,12 @@ static QString generateClassPropCPP(const ClassProp *classProp, const QString &c
     if (classProp->type() == "QObject*")
     {
         cpp += "void %%Classname%%::%%propname%%DeletedSlot()\n"
-                "{\n"
-                "    set%%Propname%%(Q_NULLPTR);\n"
-                "}\n";
+               "{\n";
+        if (classProp->write())
+            cpp += "    set%%Propname%%(Q_NULLPTR);\n";
+        else
+            cpp += "    set%%Propname%%Imp(Q_NULLPTR);\n";
+        cpp += "}\n";
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -188,6 +186,10 @@ static QString generateClassPropSave(const ClassProp *classProp)
                "        %%subtype%% *o = p->_%%propname%%->get<%%subtype%%*>(i);\n"
                "        ds << %%subtype%%::_indexedPtrs.value(o);\n"
                "    }\n";
+    }
+    else if (classProp->type() == "enum")
+    {
+        cpp += "    ds << static_cast<qint32>(p->_%%propname%%);\n";
     }
     else
     {
@@ -218,6 +220,14 @@ static QString generateClassPropLoad(const ClassProp *classProp)
                "        p->%%propname%%()->insertRow(obj,  p->%%propname%%()->count());\n"
                "    }\n";
     }
+    else if (classProp->type() == "enum")
+    {
+        cpp += "    {\n"
+               "        qint32 value;\n"
+               "        ds >> value;\n"
+               "        p->_%%propname%% = static_cast<typeof p->_%%propname%%>(value);\n"
+               "    }\n";
+    }
     else
     {
         cpp += "    ds >> p->_%%propname%%;\n";
@@ -245,6 +255,10 @@ static QString generateClassPropToJson(const ClassProp *classProp)
                "            array.append(%%subtype%%::_indexedPtrs.value(static_cast<%%subtype%%*>(o)));\n"
                "        object.insert(QLatin1String(\"%%propname%%\"), array);\n"
                "    }\n";
+    }
+    else if (classProp->type() == "enum")
+    {
+        cpp += "    object.insert(QLatin1String(\"%%propname%%\"), toJson(QVariant::fromValue(p->_%%propname%%).toString()));\n";
     }
     else
     {
@@ -276,6 +290,14 @@ static QString generateClassPropFromJson(const ClassProp *classProp)
                "        p->%%propname%%()->insertRow(obj, p->_%%propname%%->count());\n"
                "    }\n";
     }
+    else if (classProp->type() == "enum")
+    {
+        cpp += "    {\n"
+               "        QString string;\n"
+               "        fromJson(object.value(QLatin1String(\"%%propname%%\")), string);\n"
+               "        p->_%%propname%% = QVariant(string).value<typeof p->_%%propname%%>();\n"
+               "    }\n";
+    }
     else
     {
         cpp += "    fromJson(object.value(QLatin1String(\"%%propname%%\")), p->_%%propname%%);\n";
@@ -302,6 +324,25 @@ static QString generateClassModelH(const ClassModel *classModel, bool isRoot)
           "    Q_INVOKABLE %%Classname%%(QObject *parent = Q_NULLPTR);\n"
           "    ~%%Classname%%();\n";
 
+    for (int enumIndex = 0; enumIndex < classModel->enums()->count(); ++enumIndex)
+    {
+        Enum *enum_ = classModel->enums()->get<Enum*>(enumIndex);
+
+        cpp += QString("\n");
+        cpp += QString("    enum ") + enum_->name() + " {\n";
+
+        for (int valueIndex = 0; valueIndex < enum_->values()->count(); ++valueIndex)
+        {
+            EnumValue *enumValue = enum_->values()->get<EnumValue*>(valueIndex);
+
+            cpp += QString("        ") + enumValue->name();
+            cpp += (valueIndex + 1 == enum_->values()->count()) ? "\n" : ",\n";
+        }
+
+        cpp += QString("    };\n");
+        cpp += QString("    Q_ENUM(%1)\n").arg(enum_->name());
+    }
+
     for (int i=0;i<classModel->properties()->count(); i++)
     {
         ClassProp *p =  classModel->properties()->get<ClassProp*>(i);
@@ -309,12 +350,12 @@ static QString generateClassModelH(const ClassModel *classModel, bool isRoot)
     }
 
     cpp += "\npublic:\n"
-            "    friend QDataStream& operator<< (QDataStream& ds, const %%Classname%% * p);\n"
-            "    friend QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n"
-            "\n"
-            "    friend QJsonObject toJson(const %%Classname%% *p);\n"
-            "    friend void fromJson(const QJsonValue &value, %%Classname%% *p);\n"
-            "\n";
+           "    friend QDataStream& operator<< (QDataStream& ds, const %%Classname%% * p);\n"
+           "    friend QDataStream& operator>> (QDataStream& ds, %%Classname%% * p);\n"
+           "\n"
+           "    friend QJsonObject toJson(const %%Classname%% *p);\n"
+           "    friend void fromJson(const QJsonValue &value, %%Classname%% *p);\n"
+           "\n";
 
     if (!isRoot) {
         cpp += "    static void init(int count);\n"
@@ -583,11 +624,11 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
                 "#include <QRectF>\n"
                 "\n";
 
-            QSet<QString> list;// first classes by this program, later classes that are external
+            QSet<QString> set;// first classes by this program, later classes that are external
             for (int i=0; i<classes->count(); i++)
             {
                 ClassModel *classModel = classes->get<ClassModel*>(i);
-                list.insert(classModel->name());
+                set.insert(classModel->name());
 
                 for (int j=0; j<classModel->properties()->count(); j++)
                 {
@@ -595,12 +636,15 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
 
                     if (prop->type() == "QObject*")
                         if (prop->subType().length()>0)
-                            list.insert(prop->subType());
+                            set.insert(prop->subType());
                 }
             }
-            QSetIterator<QString> i(list);
-            while (i.hasNext())
-                h += QString("class ") + i.next() + ";\n";
+
+            QList<QString> list = set.toList();
+            std::sort(list.begin(), list.end());
+
+            for (const QString &name : list)
+                h += QString("class ") + name + ";\n";
 
             h += "\n#include \"../model_engine/jsonconverters.h\"\n"
                  "#include \"../model_engine/objectlist.h\"\n"
@@ -642,7 +686,7 @@ void CodeGenerator::generateFiles(QObject *modelObject, const QString &folder) c
             //%%register_types%%
             tmp.clear();
             for (const QString &name : names)
-                tmp += QString("    qmlRegisterType<%1>();\n").arg(name);
+                tmp += QString("    qmlRegisterUncreatableType<%1>(\"%2\", 1, 0, \"%1\", \"%1 is created natively\");\n").arg(name, model->name());
             cpp.replace("%%register_types%%", tmp);
 
             //ds >> count; Model::init(count);
