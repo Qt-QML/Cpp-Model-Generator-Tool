@@ -71,6 +71,7 @@ ClassModel::ClassModel(QObject *parent) :
 {
     _properties = new ObjectList(ClassProp::staticMetaObject, 0);
     _name = "unnamed";
+    _enums = new ObjectList(Enum::staticMetaObject, 0);
 
     _ptrs.append(this);
 }
@@ -78,6 +79,7 @@ ClassModel::ClassModel(QObject *parent) :
 ClassModel::~ClassModel()
 {
     _properties->deleteLater();
+    _enums->deleteLater();
 
     _ptrs.removeOne(this);
 }
@@ -180,6 +182,32 @@ void ClassModel::setCposImp(QPointF val)
     emit cposChanged();
 }
 
+// ----[ enums ] ----
+ObjectList* ClassModel::enums() const
+{
+    return _enums;
+}
+void ClassModel::setEnums(ObjectList* val)
+{
+    if (val == _enums)
+        return;
+
+    if (Undoer::instance()->noundo() == false)
+    {
+        setEnumsImp(val);
+        return;
+    }
+
+    QUndoCommand *cmd = new PropertyChangeCmd(this, "enums",QVariant::fromValue(_enums), QVariant::fromValue(val));
+    cmd->setText("Set Enums");
+    Undoer::instance()->push(cmd);
+}
+void ClassModel::setEnumsImp(ObjectList* val)
+{
+    _enums = val;
+    emit enumsChanged();
+}
+
 
 QDataStream& operator<< (QDataStream& ds, const ClassModel * p)
 {
@@ -200,6 +228,15 @@ QDataStream& operator<< (QDataStream& ds, const ClassModel * p)
 
     // ----[ pos SAVE ] ----
     ds << p->_pos;
+
+
+    // ----[ enums SAVE ] ----
+    ds << ((qint32)(p->_enums->count()));
+    for (int i=0; i<p->_enums->count(); i++)
+    {
+        Enum *o = p->_enums->get<Enum*>(i);
+        ds << Enum::_indexedPtrs.value(o);
+    }
 
 
     return ds;
@@ -226,6 +263,16 @@ QDataStream& operator>> (QDataStream& ds, ClassModel * p)
     // ----[ pos LOAD ] ----
     ds >> p->_pos;
 
+    // ----[ enums LOAD ] ----
+    p->enums()->removeAll();
+    ds >> count;
+    for (quint32 i=0; i<count; i++)
+    {
+        ds >> index;
+        Enum *obj = (index == -1 ? Q_NULLPTR : Enum::_ptrs[index]);
+        p->enums()->insertRow(obj,  p->enums()->count());
+    }
+
 
     return ds;
 }
@@ -242,6 +289,12 @@ QJsonObject toJson(const ClassModel *p)
     }
     object.insert(QLatin1String("name"), toJson(p->_name));
     object.insert(QLatin1String("pos"), toJson(p->_pos));
+    {
+        QJsonArray array;
+        for (QObject *o : p->_enums->list())
+            array.append(Enum::_indexedPtrs.value(static_cast<Enum*>(o)));
+        object.insert(QLatin1String("enums"), array);
+    }
     return object;
 }
 
@@ -256,4 +309,10 @@ void fromJson(const QJsonValue &value, ClassModel *p)
     }
     fromJson(object.value(QLatin1String("name")), p->_name);
     fromJson(object.value(QLatin1String("pos")), p->_pos);
+    p->_enums->removeAll();
+    for (const QJsonValue &value : object.value("enums").toArray()) {
+        int index = value.toInt(-1);
+        Enum *obj = (index == -1 ? Q_NULLPTR : Enum::_ptrs[index]);
+        p->enums()->insertRow(obj, p->_enums->count());
+    }
 }

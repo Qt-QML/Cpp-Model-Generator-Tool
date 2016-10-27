@@ -34,7 +34,8 @@
                 6,
                 5,
                 4,
-                20
+                20,
+                27
             ]
         },
         {
@@ -78,6 +79,27 @@
             "properties": [
                 25,
                 26
+            ]
+        },
+        {
+            "name": "Enum",
+            "pos": {
+                "x": 0,
+                "y": 0
+            },
+            "properties": [
+                28,
+                29
+            ]
+        },
+        {
+            "name": "EnumValue",
+            "pos": {
+                "x": 0,
+                "y": 0
+            },
+            "properties": [
+                30
             ]
         }
     ],
@@ -486,6 +508,66 @@
             "undo": true,
             "validate": "",
             "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "_enums->deleteLater()",
+            "init": "_enums = new ObjectList(Enum::staticMetaObject, 0)",
+            "name": "enums",
+            "notify": true,
+            "null": true,
+            "read": true,
+            "save": true,
+            "subType": "Enum",
+            "type": "ObjectList*",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "_name = \"unnamed\"",
+            "name": "name",
+            "notify": true,
+            "null": true,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "QString",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "_values->deleteLater()",
+            "init": "_values = new ObjectList(EnumValue::staticMetaObject, 0)",
+            "name": "values",
+            "notify": true,
+            "null": true,
+            "read": true,
+            "save": true,
+            "subType": "EnumValue",
+            "type": "ObjectList*",
+            "undo": true,
+            "validate": "",
+            "write": true
+        },
+        {
+            "count": 0,
+            "destruct": "",
+            "init": "_name = \"unnamed\"",
+            "name": "name",
+            "notify": true,
+            "null": true,
+            "read": true,
+            "save": true,
+            "subType": "",
+            "type": "QString",
+            "undo": true,
+            "validate": "",
+            "write": true
         }
     ],
     "Links": [
@@ -515,7 +597,9 @@
             2,
             3,
             0,
-            5
+            5,
+            6,
+            7
         ],
         "links": [
             4,

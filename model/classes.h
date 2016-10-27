@@ -14,6 +14,8 @@
 
 class ClassModel;
 class ClassProp;
+class Enum;
+class EnumValue;
 class Links;
 class Model;
 
@@ -25,5 +27,7 @@ class Model;
 #include "classprop.h"
 #include "model.h"
 #include "links.h"
+#include "enum.h"
+#include "enumvalue.h"
 
 #endif // CLASSESMODEL_H

@@ -62,6 +62,19 @@ private:
 private:
     QPointF _cpos;
 
+
+    // ----[ enums ] ----
+public:
+    Q_PROPERTY(ObjectList* enums  READ enums  WRITE setEnums  NOTIFY enumsChanged  )
+    ObjectList* enums() const;
+    void setEnums(ObjectList* val);
+signals:
+    void enumsChanged();
+private:
+    void setEnumsImp(ObjectList* val);
+private:
+    ObjectList* _enums;
+
 public:
     friend QDataStream& operator<< (QDataStream& ds, const ClassModel * p);
     friend QDataStream& operator>> (QDataStream& ds, ClassModel * p);
