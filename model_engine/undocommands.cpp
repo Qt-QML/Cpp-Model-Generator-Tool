@@ -86,7 +86,7 @@ RemoveRowCmd::RemoveRowCmd(ObjectList *model, int index)
       _model(model),
       _index(index)
 {
-    setText("Remove row");
+    setText("Remove Row");
 }
 
 RemoveRowCmd::~RemoveRowCmd()
@@ -134,7 +134,7 @@ MoveRowCmd::MoveRowCmd(ObjectList *model, int index, int toIndex)
       _index(index),
       _toIndex(toIndex)
 {
-    setText("Move row");
+    setText("Move Row");
 
     _time.start();
 
@@ -210,7 +210,7 @@ InsertRowCmd::InsertRowCmd(ObjectList *model, QObject *obj, int index)
 {
     connect(_obj, SIGNAL(destroyed()), this, SLOT(objDestroyed()));
 
-    setText("insert row");
+    setText("Insert Row");
 }
 
 InsertRowCmd::~InsertRowCmd()

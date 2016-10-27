@@ -126,8 +126,7 @@ QVariantList ObjectList::props(const QString & name)
 
 void ObjectList::set(int index, const QByteArray & name, const QVariant &value)
 {
-    QObject *o = get(index);
-    if (o)
+    if (QObject *o = get(index))
     {
         if (o->property(name) == value)
             return;
@@ -140,6 +139,11 @@ void ObjectList::set(int index, const QByteArray & name, const QVariant &value)
 
 void ObjectList::removeWithUndo(int index)
 {
+    if (index < 0 || index >= count()) {
+        qWarning() << "ObjectList::removeWithUndo: index out of range";
+        return;
+    }
+
     // execute remove command
     RemoveRowCmd *command1 = new RemoveRowCmd(this, index);
     Undoer::instance()->push(command1);
@@ -148,7 +152,16 @@ void ObjectList::removeWithUndo(int index)
 void ObjectList::moveWithUndo(int index, int toIndex)
 {
     if (index == toIndex)
+        return; // nothing to do
+
+    if (index < 0 || index >= count()) {
+        qWarning() << "ObjectList::moveWithUndo: source index out of range";
         return;
+    }
+    if (toIndex < 0 || toIndex > count()) {
+        qWarning() << "ObjectList::moveWithUndo: destination index out of range";
+        return;
+    }
 
     MoveRowCmd *command1 = new MoveRowCmd(this, index, toIndex);
     Undoer::instance()->push(command1);

@@ -90,6 +90,11 @@ Model *ModelLoader::load(const QString &fileName)
 
 bool ModelLoader::save(const QString &fileName, QObject *model) const
 {
+    if (!model) {
+        qWarning() << "ModelLoader::saveAsJson: no model given";
+        return false;
+    }
+
     QUrl url(fileName);
 
     QSaveFile f(url.toLocalFile());
@@ -162,6 +167,11 @@ Model *ModelLoader::loadFromJson(const QString &fileName)
 
 bool ModelLoader::saveAsJson(const QString &fileName, QObject *model) const
 {
+    if (!model) {
+        qWarning() << "ModelLoader::saveAsJson: no model given";
+        return false;
+    }
+
     QUrl url(fileName);
 
     QSaveFile f(url.toLocalFile());

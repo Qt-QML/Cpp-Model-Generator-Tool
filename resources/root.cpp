@@ -70,6 +70,11 @@ Undoer *%%Classname%%Loader::undoer() const
 
 bool %%Classname%%Loader::save(const QString &fileName, QObject *model) const
 {
+    if (!model) {
+        qWarning() << "%%Classname%%Loader::saveAsJson: no model given";
+        return false;
+    }
+
     QUrl url(fileName);
 
     QSaveFile f(url.toLocalFile());
@@ -117,6 +122,11 @@ bool %%Classname%%Loader::save(const QString &fileName, QObject *model) const
 
 bool %%Classname%%Loader::saveAsJson(const QString &fileName, QObject *model) const
 {
+    if (!model) {
+        qWarning() << "%%Classname%%Loader::saveAsJson: no model given";
+        return false;
+    }
+
     QUrl url(fileName);
 
     QSaveFile f(url.toLocalFile());
